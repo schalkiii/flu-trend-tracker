@@ -1,0 +1,48 @@
+name: Update flu data
+
+on:
+  schedule:
+    # 每周五 16:10 UTC = 北京时间周六 00:10（周报一般周四/周五发布）
+    - cron: "10 16 * * 4"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-flu-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install parser deps
+        run: pip install pdfplumber
+
+      - name: Fetch latest reports
+        run: python scripts/fetch_cdc.py --pages 4 --weeks 80
+
+      - name: Verify data integrity
+        run: python verify_page.py
+
+      # 城市级百度指数无法在 CI 采集: 接口为 TLS 指纹级风控, 需本机浏览器(webbridge)实时取凭证。
+      # 现役路线见 README「城市级数据采集」: bash scripts/run_browser_fetch.sh (本地手动运行)。
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "flu-bot"
+          git config user.email "actions@github.com"
+          git add data/flu_national.json data/flu_cities.json
+          if git diff --cached --quiet; then
+            echo "No data change, skip commit."
+          else
+            git commit -m "data: update flu weekly report ($(date -u +%F))"
+            git push
+          fi

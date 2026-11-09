@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>流感监测周报 · 每周追踪</title>
+<meta name="page-type" content="software">
+<meta name="site-kind" content="software">
+<style>
+:root {
+  --ink: #1c2833;
+  --ink-2: #5d6d7e;
+  --ink-3: #85929e;
+  --paper: #fbfaf7;
+  --paper-2: #f4f2ec;
+  --rule: #d5d0c5;
+  --rule-soft: #e8e4da;
+  --south: #b03a2e;
+  --north: #1f618d;
+  --all: #9c6b1e;
+  --outbreak: #5d4a78;
+  --baidu: #b03a2e;
+  --oseltamivir: #1e8449;
+  --accent: #6b5b3e;
+  --up: #b03a2e;
+  --dn: #1e8449;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Source Han Serif SC", "Noto Serif SC", "Songti SC", SimSun, serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.75;
+}
+.num { font-family: Consolas, "Courier New", monospace; font-variant-numeric: tabular-nums; text-align: right; }
+
+/* ---- 顶部横幅 ---- */
+header { max-width: 1080px; margin: 0 auto; padding: 44px 32px 8px; }
+.kicker {
+  font-size: 12px; letter-spacing: .35em; color: var(--ink-3);
+  text-transform: uppercase; font-family: Georgia, serif;
+}
+h1 {
+  font-size: 30px; font-weight: 700; margin: 6px 0 4px; letter-spacing: .02em;
+  font-family: "Source Han Serif SC", "Noto Serif SC", SimSun, serif;
+}
+.subtitle { font-size: 14px; color: var(--ink-2); }
+.subtitle .stamp { color: var(--south); font-weight: 600; }
+
+/* ---- 导航 ---- */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(251,250,247,.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+  margin: 18px 0 0;
+}
+nav .inner {
+  max-width: 1080px; margin: 0 auto; padding: 10px 32px;
+  display: flex; gap: 22px; flex-wrap: wrap;
+}
+nav a {
+  font-size: 13px; color: var(--ink-2); text-decoration: none;
+  padding-bottom: 2px; border-bottom: 2px solid transparent;
+  font-family: "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+}
+nav a:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+main { max-width: 1080px; margin: 0 auto; padding: 8px 32px 60px; }
+
+/* ---- 章节体例 ---- */
+section { margin: 44px 0 0; }
+.sec-head {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule); padding-bottom: 8px; margin-bottom: 18px;
+}
+.sec-no {
+  font-family: Georgia, serif; font-size: 15px; color: var(--accent);
+  font-style: italic; letter-spacing: .05em;
+}
+.sec-title { font-size: 19px; font-weight: 700; margin: 0; }
+.sec-note { font-size: 12px; color: var(--ink-3); margin-left: auto; }
+
+/* ---- 大数字指标行 ---- */
+.gauges {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1px; background: var(--rule);
+  border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule);
+}
+.gauge { background: var(--paper); padding: 16px 18px 14px; }
+.gauge .label { font-size: 12px; color: var(--ink-2); letter-spacing: .08em; }
+.gauge .value { font-size: 27px; font-weight: 700; margin: 2px 0; font-variant-numeric: tabular-nums; }
+.gauge .sub { font-size: 12px; color: var(--ink-3); line-height: 1.5; }
+.up { color: var(--up); } .dn { color: var(--dn); } .flat { color: var(--ink-3); }
+
+/* ---- 图表容器 ---- */
+.chart-box { width: 100%; }
+.legend {
+  display: flex; gap: 20px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2);
+  padding: 2px 0 8px;
+  font-family: "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+}
+.legend i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: 3px; }
+
+/* ---- 时间范围 / 城市切换 ---- */
+.range-btn {
+  display: inline-block; padding: 2px 14px; font-size: 12.5px;
+  border: 1px solid var(--rule); border-radius: 999px; margin: 0 6px 8px 0;
+  cursor: pointer; color: var(--ink-2); user-select: none;
+  font-family: "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+  transition: all .15s;
+}
+.range-btn:hover { border-color: var(--accent); color: var(--accent); }
+.range-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ---- 表格 ---- */
+table {
+  width: 100%; border-collapse: collapse; font-size: 13.5px;
+  font-family: "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+}
+th {
+  font-weight: 600; color: var(--ink-2); text-align: right;
+  border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule);
+  padding: 8px 10px; font-size: 12.5px; letter-spacing: .03em;
+}
+th:first-child { text-align: left; }
+td { padding: 8px 10px; border-bottom: 1px solid var(--rule-soft); text-align: right; }
+td:first-child { text-align: left; }
+tr:hover td { background: var(--paper-2); }
+
+/* ---- 脚注 ---- */
+.footnote {
+  font-size: 12.5px; color: var(--ink-3); line-height: 1.8;
+  margin-top: 10px; padding-left: 14px; border-left: 2px solid var(--rule-soft);
+}
+
+.disclosure {
+  margin: 48px 0 0; padding: 18px 20px; background: var(--paper-2);
+  border: 1px solid var(--rule-soft); border-radius: 4px;
+  font-size: 12.5px; color: var(--ink-2); line-height: 1.9;
+  font-family: "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+}
+.disclosure b { color: var(--ink); }
+
+@media (max-width: 760px) {
+  header, main { padding-left: 18px; padding-right: 18px; }
+  h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Influenza Surveillance &middot; Weekly Note</div>
+  <h1>流感监测周报追踪</h1>
+  <div class="subtitle">
+    南北省份哨点监测与城市搜索代理 &middot; 最新 <span class="stamp" id="latest-badge">加载中…</span>
+    &middot; 中国国家流感中心周报机器解析（T+7）
+  </div>
+</header>
+
+<nav><div class="inner">
+  <a href="#g-ili">ILI% 走势</a>
+  <a href="#g-pos">检测阳性率</a>
+  <a href="#g-outbreak">暴发疫情</a>
+  <a href="#g-city">城市搜索代理</a>
+  <a href="#g-detail">明细数据</a>
+  <a href="#g-method">方法与限度</a>
+</div></nav>
+
+<main>
+
+<section>
+  <div class="gauges" id="gauges"></div>
+  <p class="footnote">ILI%（流感样病例就诊百分比）与检测阳性率是流感活动强度的核心监测指标。涨红跌绿，全文同；环比基线为上一期周报。</p>
+</section>
+
+<section id="g-ili">
+  <div class="sec-head">
+    <span class="sec-no">图 1</span><h2 class="sec-title">南方 / 北方省份 ILI% 走势</h2>
+    <span class="sec-note">哨点医院流感样病例占门急诊病例百分比 · 可缩放</span>
+  </div>
+  <div>
+    <span class="range-btn active" data-range="0" onclick="setRange(this)">全部</span>
+    <span class="range-btn" data-range="104" onclick="setRange(this)">近2年</span>
+    <span class="range-btn" data-range="52" onclick="setRange(this)">近1年</span>
+    <span class="range-btn" data-range="26" onclick="setRange(this)">近半年</span>
+  </div>
+  <div id="chart-ili" class="chart-box"></div>
+  <p class="footnote">南方省份通常先于北方进入流感季（冬季高峰），ILI% 突破基线并连续抬升是季节性流行的起点标记。灰色纵带为跨年边界。</p>
+</section>
+
+<section id="g-pos">
+  <div class="sec-head">
+    <span class="sec-no">图 2</span><h2 class="sec-title">流感病毒检测阳性率</h2>
+    <span class="sec-note">监测网络实验室 · 南方 / 北方 / 全国</span>
+  </div>
+  <div id="chart-pos" class="chart-box"></div>
+  <p class="footnote">阳性率是比 ILI% 更特异的病原学指标：ILI% 升高而阳性率平稳，多为其他呼吸道病原；两者同步抬升才是实验室确认的流感活动。</p>
+</section>
+
+<section id="g-outbreak">
+  <div class="sec-head">
+    <span class="sec-no">图 3</span><h2 class="sec-title">流感样病例暴发疫情</h2>
+    <span class="sec-note">每周报告起数 · 全国</span>
+  </div>
+  <div id="chart-outbreak" class="chart-box"></div>
+  <p class="footnote">暴发疫情指一周内同一集体单位出现规定数量的流感样病例。学校是主要报告来源，开学季（9 月）与冬季高峰（12 月—次年 1 月）为两个年度峰值。</p>
+</section>
+
+<section id="g-city">
+  <div class="sec-head">
+    <span class="sec-no">图 4</span><h2 class="sec-title">城市级趋势：搜索指数代理</h2>
+    <span class="sec-note">百度指数相对值 &middot; 与哨点监测独立的两条证据链</span>
+  </div>
+  <div id="city-bar" style="margin-bottom:6px;"></div>
+  <div style="margin-bottom:6px;">
+    <span class="range-btn active" data-crange="0" onclick="setCityRange(this)">全部</span>
+    <span class="range-btn" data-crange="183" onclick="setCityRange(this)">近半年</span>
+    <span class="range-btn" data-crange="90" onclick="setCityRange(this)">近90天</span>
+    <span class="range-btn" data-crange="30" onclick="setCityRange(this)">近30天</span>
+  </div>
+  <div class="legend" style="padding-top:0;">
+    <span><i style="background:var(--baidu)"></i>「发烧」搜索指数</span>
+    <span><i style="background:var(--oseltamivir)"></i>「奥司他韦」搜索指数</span>
+  </div>
+  <div id="chart-city" class="chart-box"></div>
+  <p class="footnote">官方哨点只到省级；城市级以百度指数「发烧」（行为代理）与「奥司他韦」（用药代理）作趋势观察，窗口为近一年逐日数据。此前对标验证：城市搜索指数与 CDC ILI% 相关系数 r≈0.85，搜索领先哨点约 1—2 周。指数为相对值，仅看趋势不看绝对量；小体量城市低于指数脱敏阈值的日子记为 0。灰色纵带为跨年边界。</p>
+</section>
+
+<section id="g-detail">
+  <div class="sec-head">
+    <span class="sec-no">表 1</span><h2 class="sec-title">周报明细</h2>
+    <span class="sec-note">近 26 期 · 点击表头可展开全部</span>
+  </div>
+  <table id="tbl">
+    <thead><tr>
+      <th>周次</th><th>南方 ILI%</th><th>北方 ILI%</th><th>南方阳性率</th><th>北方阳性率</th><th>A 型</th><th>B 型</th><th>暴发起数</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+  <p class="footnote">阳性率为监测网络实验室检测阳性标本占比；A/B 型为当周检出的型别构成。全部字段直接来自周报摘要与核心表，未做平滑或插值。</p>
+</section>
+
+<section id="g-method">
+  <div class="sec-head">
+    <span class="sec-no">&sect;</span><h2 class="sec-title">方法、来源与限度</h2>
+  </div>
+  <ol class="method" style="font-size:13.5px; padding-left:20px; margin:0;">
+    <li style="margin-bottom:10px;"><b>全国数据的来源。</b> 国家流感中心每周发布《中国流感监测周报》，含南北省份 ILI%、网络实验室阳性率、型别构成与暴发疫情。本页由抓取流水线下载周报 PDF 并机器解析，逐期登记，全程无人为修改。</li>
+    <li style="margin-bottom:10px;"><b>城市级是代理指标，不是监测值。</b> 官方哨点仅覆盖到省级。城市曲线取百度指数「发烧」「奥司他韦」两个关键词，是居民行为的代理观察，量纲与哨点数据不可直接比较。</li>
+    <li style="margin-bottom:10px;"><b>领先—滞后关系。</b> 对标验证显示搜索指数与 CDC 哨点 ILI% 高度相关（r≈0.85）且领先约 1—2 周：搜索在就诊之前发生。这使城市搜索曲线可用于观察苗头，但只看趋势方向，不看绝对水平。</li>
+    <li style="margin-bottom:10px;"><b>数据更新节奏。</b> 全国数据随周报发布（约滞后一周）；城市搜索数据由本地流水线采集，覆盖近一年逐日（滚动更新）。两者的时间窗与口径各自独立。</li>
+    <li><b>限度。</b> 周报数据可能后向修订；搜索指数受新闻事件、舆论热度影响，并非全部由真实病例驱动。本页为描述性监测，不构成任何医疗建议。</li>
+  </ol>
+</section>
+
+<div class="disclosure">
+  <b>数据与复现。</b> 全国指标来自 <a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/" target="_blank" rel="noopener" style="color:var(--ink)">国家流感中心周报</a>，城市指标来自百度指数公开查询。全部数据由仓库内流水线自动抓取解析，可复现。本页为信息整理，不构成医疗建议；如有症状请就医并遵循医嘱。生成于 <span id="gen-time"></span>。
+</div>
+
+</main>
+
+<script>
+"use strict";
+
+const C = {
+  south: "#b03a2e", north: "#1f618d", all: "#9c6b1e", outbreak: "#5d4a78",
+  baidu: "#b03a2e", oseltamivir: "#1e8449",
+  ink: "#1c2833", ink2: "#5d6d7e", ink3: "#85929e",
+  rule: "#e8e4da", grid: "#eae6dc", yearBand: "#efece3"
+};
+
+let recs = [];            // 全国周报记录（升序）
+let chartRange = 0;       // 图1 显示最近 N 期, 0=全部
+
+/* ---------- 折线图 ---------- */
+function lineChart(el, series, opts) {
+  opts = opts || {};
+  const W = Math.min(el.parentElement.clientWidth, 1020);
+  const H = opts.height || 280, PL = 44, PR = 56, PT = 14, PB = 30;
+  const allY = series.flatMap(s => s.points.map(p => p.y)).filter(v => v != null);
+  if (!allY.length) { el.innerHTML = ""; return; }
+  const yMax = Math.max(...allY) * 1.12, yMin = Math.min(0, Math.min(...allY));
+  const n = Math.max(...series.map(s => s.points.length));
+  const xAt = i => PL + (n <= 1 ? 0 : i * (W - PL - PR) / (n - 1));
+  const yAt = v => PT + (yMax - v) * (H - PT - PB) / (yMax - yMin);
+
+  // 跨年灰色纵带（series[0].points[i].year 提供）
+  let bands = "";
+  const yrs = series[0].points.map(p => p.year).filter(y => y != null);
+  for (let i = 1; i < yrs.length; i++) {
+    if (yrs[i] !== yrs[i - 1]) {
+      const x = (xAt(i - 1) + xAt(i)) / 2;
+      bands += `<line x1="${x}" y1="${PT}" x2="${x}" y2="${H - PB}" stroke="${C.yearBand}" stroke-width="10"/>`;
+    }
+  }
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">` + bands;
+  const steps = 4;
+  for (let g = 0; g <= steps; g++) {
+    const v = yMin + (yMax - yMin) * g / steps, y = yAt(v);
+    svg += `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}" stroke="${C.grid}" stroke-width="1"/>`;
+    svg += `<text x="${PL - 6}" y="${y + 4}" fill="${C.ink3}" font-size="10.5" text-anchor="end" font-family="Consolas,monospace">${(opts.yFmt || (v => v))(v)}</text>`;
+  }
+  // 稀疏标签（如月份刻度, 非空≤14个）全画; 密标签退回首/中/尾 3 个
+  const labelIdx = [];
+  series[0].points.forEach((p, i) => { if (p.x != null) labelIdx.push(i); });
+  const drawX = opts.xIdx || (labels_n => labelIdx.length && labelIdx.length <= 14
+    ? labelIdx
+    : [0, Math.floor((labels_n - 1) / 2), labels_n - 1]);
+  drawX(n).forEach(i => {
+    const lb = series[0].points[i];
+    if (lb && lb.x != null)
+      svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x}</text>`;
+  });
+  for (const s of series) {
+    const seg = s.points.map((p, i) => ({ i, v: p.y, x: xAt(i), y: p.y == null ? null : yAt(p.y) })).filter(p => p.v != null);
+    if (seg.length > 1) {
+      svg += `<polyline points="${seg.map(p => p.x.toFixed(1) + "," + p.y.toFixed(1)).join(" ")}" fill="none" stroke="${s.color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+    }
+    const last = seg[seg.length - 1];
+    if (!opts.noDots) {
+      for (const p of seg) {
+        svg += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p === last ? 2.8 : 1.8}" fill="${s.color}"/>`;
+      }
+    }
+    if (last) {
+      svg += `<text x="${Math.min(last.x + 7, W - 8)}" y="${last.y + 4}" fill="${s.color}" font-size="11" font-weight="700" font-family="Consolas,monospace">${(opts.yFmt || String)(last.v)}</text>`;
+    }
+  }
+  svg += "</svg>";
+  el.innerHTML = svg;
+}
+
+/* ---------- 柱状图 ---------- */
+function barChart(el, points, color) {
+  const W = Math.min(el.parentElement.clientWidth, 1020);
+  const H = 260, PL = 44, PR = 56, PT = 14, PB = 30;
+  const yMax = Math.max(...points.map(p => p.y)) * 1.12;
+  const n = points.length;
+  const bw = Math.max(2, Math.min(14, (W - PL - PR) / n * 0.6));
+  const xAt = i => PL + (i + 0.5) * (W - PL - PR) / n;
+  const yAt = v => PT + (yMax - v) * (H - PT - PB) / yMax;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+  for (let g = 0; g <= 4; g++) {
+    const v = yMax * g / 4, y = yAt(v);
+    svg += `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}" stroke="${C.grid}" stroke-width="1"/>`;
+    svg += `<text x="${PL - 6}" y="${y + 4}" fill="${C.ink3}" font-size="10.5" text-anchor="end" font-family="Consolas,monospace">${Math.round(v)}</text>`;
+  }
+  points.forEach((p, i) => {
+    const y = yAt(p.y);
+    svg += `<rect x="${(xAt(i) - bw / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${(H - PB - y).toFixed(1)}" fill="${color}" opacity="0.85"/>`;
+  });
+  const last = points[n - 1];
+  svg += `<text x="${Math.min(xAt(n - 1) + 7, W - 8)}" y="${yAt(last.y) + 4}" fill="${color}" font-size="11" font-weight="700" font-family="Consolas,monospace">${last.y}</text>`;
+  [0, Math.floor((n - 1) / 2), n - 1].forEach(i => {
+    svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${points[i].x}</text>`;
+  });
+  svg += "</svg>";
+  el.innerHTML = svg;
+}
+
+/* ---------- 涨跌 ---------- */
+function deltaClass(cur, prev) {
+  if (cur == null || prev == null) return "flat";
+  const d = cur - prev;
+  return d > 0.05 ? "up" : d < -0.05 ? "down" : "flat";
+}
+function deltaHTML(cur, prev, unit) {
+  if (cur == null || prev == null) return "—";
+  const d = cur - prev;
+  const cls = deltaClass(cur, prev);
+  if (cls === "flat") return `<span class="flat">→ 持平</span>`;
+  const sign = d > 0 ? "+" : "−";
+  return `<span class="${cls}">${d > 0 ? "↑" : "↓"} ${sign}${Math.abs(d).toFixed(1)}${unit}</span> 环比上期`;
+}
+
+/* ---------- 全国渲染 ---------- */
+function renderNational() {
+  const last = recs[recs.length - 1], prev = recs[recs.length - 2];
+  document.getElementById("latest-badge").textContent = `${last.year}年第${last.week}周`;
+
+  const gauges = [
+    { label: "南方省份 ILI%", v: last.south_ili_pct, p: prev.south_ili_pct, unit: "%", dU: "pp", sub: "哨点医院门急诊占比" },
+    { label: "北方省份 ILI%", v: last.north_ili_pct, p: prev.north_ili_pct, unit: "%", dU: "pp", sub: "哨点医院门急诊占比" },
+    { label: "全国检测阳性率", v: last.total_pos_rate, p: prev.total_pos_rate, unit: "%", dU: "pp", sub: "网络实验室 · " + last.type_a + " A 型 / " + last.type_b + " B 型" },
+    { label: "暴发疫情（本周）", v: last.outbreaks, p: prev.outbreaks, unit: "", dU: " 起", sub: "发布于 " + (last.publish_date || "—") },
+  ];
+  document.getElementById("gauges").innerHTML = gauges.map(g => `
+    <div class="gauge">
+      <div class="label">${g.label}</div>
+      <div class="value">${g.v == null ? "—" : g.v}<span style="font-size:14px;color:var(--ink-3)">${g.v == null ? "" : g.unit}</span></div>
+      <div class="sub">${deltaHTML(g.v, g.p, g.dU)}<br>${g.sub}</div>
+    </div>`).join("");
+
+  drawILI();
+  drawPos();
+  drawOutbreak();
+  drawTable();
+}
+
+function viewRecs() {
+  return chartRange > 0 ? recs.slice(-chartRange) : recs;
+}
+
+function drawILI() {
+  const rs = viewRecs();
+  const labels = rs.map(r => r.week >= 27 || r.week <= 6 || rs.length <= 60
+    ? `${String(r.week).padStart(2, "0")}周` : null);
+  lineChart(document.getElementById("chart-ili"), [
+    { name: "南方", color: C.south, points: rs.map((r, i) => ({ x: labels[i], y: r.south_ili_pct, year: r.year })) },
+    { name: "北方", color: C.north, points: rs.map((r, i) => ({ x: labels[i], y: r.north_ili_pct, year: r.year })) },
+  ], { yFmt: v => v.toFixed(1) + "%" });
+}
+
+function drawPos() {
+  const rs = viewRecs();
+  const labels = rs.map(r => `${String(r.week).padStart(2, "0")}周`);
+  lineChart(document.getElementById("chart-pos"), [
+    { name: "南方", color: C.south, points: rs.map((r, i) => ({ x: labels[i], y: r.south_pos_rate, year: r.year })) },
+    { name: "北方", color: C.north, points: rs.map((r, i) => ({ x: labels[i], y: r.north_pos_rate, year: r.year })) },
+    { name: "全国", color: C.all, points: rs.map((r, i) => ({ x: labels[i], y: r.total_pos_rate, year: r.year })) },
+  ], { yFmt: v => v.toFixed(0) + "%" });
+}
+
+function drawOutbreak() {
+  const rs = viewRecs();
+  barChart(document.getElementById("chart-outbreak"),
+    rs.map(r => ({ x: `${String(r.week).padStart(2, "0")}周`, y: r.outbreaks })), C.outbreak);
+}
+
+let showAllRows = false;
+function drawTable() {
+  const shown = showAllRows ? recs : recs.slice(-26);
+  const tb = document.querySelector("#tbl tbody");
+  tb.innerHTML = shown.slice().reverse().map(r => `
+    <tr>
+      <td>${r.year}年 第${r.week}周</td>
+      <td class="num">${r.south_ili_pct ?? "—"}</td>
+      <td class="num">${r.north_ili_pct ?? "—"}</td>
+      <td class="num">${r.south_pos_rate ?? "—"}%</td>
+      <td class="num">${r.north_pos_rate ?? "—"}%</td>
+      <td class="num">${r.type_a ?? "—"}</td>
+      <td class="num">${r.type_b ?? "—"}</td>
+      <td class="num">${r.outbreaks ?? "—"}</td>
+    </tr>`).join("");
+}
+
+function setRange(btn) {
+  document.querySelectorAll("[data-range]").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  chartRange = parseInt(btn.dataset.range, 10);
+  drawILI(); drawPos(); drawOutbreak();
+}
+
+/* ---------- 城市级（百度指数代理）---------- */
+let cityData = null;
+let activeCity = null;
+let cityRange = 0;
+
+function renderCity() {
+  const bar = document.getElementById("city-bar");
+  const chartEl = document.getElementById("chart-city");
+  if (!cityData || !cityData.cities || Object.keys(cityData.cities).length === 0) {
+    bar.innerHTML = "";
+    chartEl.innerHTML = `<div style="padding:18px 6px;color:var(--ink-3);font-size:13px">
+      城市级数据尚未采集。需运行采集脚本（需要百度指数登录凭证），数据入库后此处自动展示。
+    </div>`;
+    return;
+  }
+  const cities = Object.keys(cityData.cities).filter(c => cityData.cities[c].kw_发烧);
+  if (!activeCity || !cities.includes(activeCity)) activeCity = cities[0];
+  bar.innerHTML = cities.map(c =>
+    `<span class="range-btn${c === activeCity ? " active" : ""}" data-city="${c}" onclick="setCity(this)">${c}</span>`
+  ).join("");
+
+  const cd = cityData.cities[activeCity];
+  let dates = Object.keys(cd.kw_发烧).sort();
+  if (cityRange > 0) dates = dates.slice(-cityRange);
+  const monthly = dates.length >= 45;
+  // 月首日期对: monthly 时 x 为 "2025-11" 月份标签, 其余为 "MM/DD"
+  const fmt = d => d.slice(5).replace("-", "/");
+  const monthOf = d => d.slice(0, 7);
+  const labels = dates.map((d, i) => {
+    if (!monthly) return fmt(d);
+    const prev = i > 0 ? monthOf(dates[i - 1]) : null;
+    return monthOf(d) !== prev ? d.slice(0, 7) : null;
+  });
+  lineChart(chartEl, [
+    { name: "发烧", color: C.baidu, points: dates.map((d, i) => ({ x: labels[i], y: cd.kw_发烧[d], year: +d.slice(0, 4) })) },
+    { name: "奥司他韦", color: C.oseltamivir, points: dates.map((d, i) => ({ x: labels[i], y: (cd.kw_奥司他韦 || {})[d] ?? null, year: +d.slice(0, 4) })) },
+  ], { yFmt: v => Math.round(v), noDots: dates.length > 120 });
+}
+
+function setCity(btn) {
+  activeCity = btn.dataset.city;
+  renderCity();
+}
+
+function setCityRange(btn) {
+  document.querySelectorAll("[data-crange]").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  cityRange = parseInt(btn.dataset.crange, 10);
+  renderCity();
+}
+
+/* ---------- 启动 ---------- */
+document.getElementById("gen-time").textContent = new Date().toLocaleString("zh-CN", { hour12: false });
+document.querySelector("#tbl thead th").addEventListener("click", () => {
+  showAllRows = !showAllRows;
+  drawTable();
+});
+
+fetch("data/flu_national.json")
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d => {
+    recs = d.records.slice().sort((a, b) => a.year - b.year || a.week - b.week);
+    document.title = `流感监测周报追踪 · ${recs[recs.length - 1].year}年第${recs[recs.length - 1].week}周`;
+    renderNational();
+  })
+  .catch(e => {
+    document.getElementById("latest-badge").textContent = "数据加载失败";
+    console.error(e);
+  });
+
+fetch("data/flu_cities.json")
+  .then(r => { if (!r.ok) return null; return r.json(); })
+  .then(d => { cityData = d; renderCity(); })
+  .catch(() => { cityData = null; renderCity(); });
+</script>
+</body>
+</html>

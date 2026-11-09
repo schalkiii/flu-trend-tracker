@@ -1,0 +1,8 @@
+scripts/cache/
+scripts/baidu_cookie.txt
+_verify*.png
+_verify*.log
+__pycache__/
+_chk*
+shots/
+
