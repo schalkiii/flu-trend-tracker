@@ -26,6 +26,8 @@ scripts/fetch_notifiable.py         国家疾控局月报抓取（法定传染�
 scripts/fetch_baidu_fast.py         城市级采集 · 现役主路线（webbridge 凭证 + 本地直连）
 scripts/fetch_baidu_via_browser.py  城市级采集 · 备用慢路线（webbridge UI 交互，仅 5 城码表）
 scripts/run_browser_fetch.sh        webbridge daemon 托管入口（起 daemon → 等扩展 → 调主路线）
+scripts/snapshot_charts.py          小红书素材截图（Edge headless + 荧光 marker 定位裁剪 6 图）
+scripts/publish_xhs.py              小红书发布（xiaohongshu-mcp localhost:18060，默认仅自己可见）
 data/flu_national.json              全国/南北数据（每次更新提交回仓库）
 data/flu_cities.json                城市级数据（增量合并，一年逐日）
 data/flu_multipathogen.json         多病原哨点监测（2024W46 起, 增量合并）
@@ -50,7 +52,45 @@ AUDIT-REPORT-2026-11-09.md          项目审计报告
 - **法定报告**（`fetch_notifiable.py`）：国家疾控局《全国（法定）传染病疫情概况》
   （ndcpa.gov.cn），列表页为 JS 渲染、文章数据以 JSON 内嵌，按对象切分解析。
   47 个月（2022-11 起）连续无断档，官方公报数字 spot check 全部命中。
-- 两个数据源的抓取频率均随 CI 每周一次，缓存目录 `scripts/cache/mp/`、`scripts/cache/nf/`。
+- 两个数据源的抓取频率均随 CI 每周一次，缓存目录 `scripts/cache/mp/`、`scripts/cache/ndcpa/`。
+
+## 小红书发布（截图 + 发帖管线）
+
+与 etf-national-team-monitor 项目同路线的两段式管线，产物在 `out/xhs/`（已 gitignore）：
+
+### ① 截图：`scripts/snapshot_charts.py`
+
+```bash
+python scripts/snapshot_charts.py          # 6 张图表图 + 全页长图 → out/xhs/
+python scripts/snapshot_charts.py --out D:\xhs   # 指定输出目录
+```
+
+技术要点（均为实测踩坑沉淀）：
+
+- **Playwright 在本机不可用**（launch 握手挂起），改用 Edge 原生 headless CLI
+  （`--headless --screenshot --force-device-scale-factor=2`，@2x 输出 2028px 宽）。
+- **file:// 协议下 fetch("data/*.json") 被 CORS 拦截，图表全空白**——必须起本地
+  http.server（脚本内置 8791 端口）以 `http://127.0.0.1` 渲染。
+- **marker 定位裁剪**：给每个 `<section>` 注入高饱和荧光色 outline
+  （`outline-offset` 外移，避免内缩式裁剪切掉贴边文字），全页截图后按颜色
+  扫描像素定位，粗扫（步长4）+ 精扫（逐像素推真实外缘）后精确裁剪。
+- **窗口自动选最短**：注入轮询脚本在数据加载后自动点击最短窗口按钮
+  （图1-3 → 近半年 26 周；图4 → 近30天；图5/图6 页面无窗口切换保持全窗口）。
+- **文字溢出防护**：裁剪后像素级四边检查（边缘 3px 内暗像素 = 0 且无 marker 残色）。
+
+### ② 发布：`scripts/publish_xhs.py`
+
+```bash
+python scripts/publish_xhs.py              # 试发（仅自己可见）
+python scripts/publish_xhs.py --public     # 正式公开发布
+```
+
+- 依赖 [xiaohongshu-mcp](https://github.com/) 本机服务（localhost:18060，JSON-RPC），
+  未登录时先运行 `C:\Users\qi.shao\.etf-ntm\xhs-mcp\xiaohongshu-login-windows-amd64.exe` 扫码。
+- 文案由 `build_content()` 从 `data/*.json` 自动组装：本周要点（ILI%/阳性率/暴发/多病原
+  top3/法定月报）+ 历史冬峰锚点 +【截图窗口说明】+ 免责声明 + 5 标签。
+- 平台硬约束：标题 ≤20 字、正文 ≤1000 字（脚本自动截断兜底）。
+- 发布可能偶发超时（MCP 30s），重试即可；发布默认仅自己可见，确认后 --public。
 
 ## 城市级数据采集（百度指数 · 现役路线）
 

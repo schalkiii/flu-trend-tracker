@@ -13,6 +13,8 @@ python verify_page.py                              # 数据断言（CI 强制, 4
 python tests/test_parse_pdf.py                     # 解析 golden 回归（4 类措辞变体）
 python -m http.server 8080                         # 本地预览
 bash scripts/run_browser_fetch.sh --days 365       # 城市采集（需 webbridge + Edge 登录）
+python scripts/snapshot_charts.py                  # 小红书素材截图（本地起 8791 端口渲染）
+python scripts/publish_xhs.py [--public]           # 小红书发布（需 xiaohongshu-mcp 本机服务）
 ```
 
 ## 技术栈与结构
@@ -37,6 +39,16 @@ bash scripts/run_browser_fetch.sh --days 365       # 城市采集（需 webbridg
 - `scripts/baidu_cookie.txt`、`scripts/cache/` 已 gitignore，严禁入库。
 - 城市采集无法 CI 化（需本机浏览器实时凭证）；CDC/多病原/法定报告由 GitHub Actions 周五自动跑。
 
+## 小红书发布约束（snapshot_charts.py / publish_xhs.py）
+
+- 截图必须走本地 HTTP（8791 端口）：file:// 下 fetch 被 CORS 拦，图表全空白。
+- marker 打在整个 `<section>` 上（标题/图例/按钮入图），outline-offset 外移 + 精扫外缘，
+  裁剪沿 marker 外缘内收 MARKER_W+1px——内缩式裁剪会切掉贴边 sec-note 尾字。
+- 窗口自动选最短档（图1-3 近半年/图4 近30天，注入脚本轮询点击）；文案【截图窗口说明】
+  段必须与实际窗口一致，改窗口时同步改 publish_xhs.py 的 build_content()。
+- 发布前像素级检查：裁剪图四边 3px 暗像素=0、marker 残色=0；标题≤20字、正文≤1000字。
+- 发布默认仅自己可见，用户确认后才 --public；MCP 偶发 30s 超时，重试即可。
+
 ## 约定
 
 - CDC 周报措辞变体（全角括号/双右括号/裸 0/"未报告"=0）修复时必须同步加 golden 用例。
@@ -48,4 +60,5 @@ bash scripts/run_browser_fetch.sh --days 365       # 城市采集（需 webbridg
 
 - 已上线 https://schalkiii.github.io/flu-trend-tracker/ ：图1-6 + 表1，数据全绿
   （verify 43 项 + golden 32 项），CI 每周五自动更新三个数据源。
+- 小红书发布管线已通（2026-11-09 三次试发成功，账号 Schalkiii）。
 - 下一步：可选做新冠月度数据模块（见 README 路线图）。
