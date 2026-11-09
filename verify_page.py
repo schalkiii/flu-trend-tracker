@@ -84,6 +84,50 @@ try:
 except FileNotFoundError:
     print("SKIP 城市级数据缺失（可选）")
 
+# 9. 多病原哨点监测（图5）
+try:
+    mp = json.load(open("data/flu_multipathogen.json", encoding="utf-8"))
+    mrecs = sorted(mp["records"], key=lambda r: (r["year"], r["week"]))
+    PATHOGENS = ["新型冠状病毒", "流感病毒", "呼吸道合胞病毒", "腺病毒", "人偏肺病毒",
+                 "副流感病毒", "普通冠状病毒", "博卡病毒", "鼻病毒", "肠道病毒", "肺炎支原体"]
+    check("多病原: 至少 52 周记录", len(mrecs) >= 52)
+    check("多病原: 每周 11 种病原体门诊值齐全",
+          all(all(p in r.get("outpatient", {}) for p in PATHOGENS) for r in mrecs))
+    check("多病原: 阳性率均在 0-100 区间",
+          all(0 <= v <= 100 for r in mrecs for v in r.get("outpatient", {}).values()))
+    # 图5 序列构造: 每个病原体按钮的折线可画（非全空）
+    for p in ["流感病毒", "鼻病毒", "新型冠状病毒"]:
+        check(f"多病原: {p} 序列非全空", any((r.get("outpatient") or {}).get(p) is not None for r in mrecs))
+    # 流感阳性率与国家流感中心周报阳性率量级一致性（同一物理量, 口径差异容忍 15pp）
+    nat = {r["week"]: r for r in recs if r["year"] == 2026}
+    diffs = [abs((nat[r["week"]]["total_pos_rate"]) - r["outpatient"]["流感病毒"])
+             for r in mrecs if r["year"] == 2026 and r["week"] in nat]
+    check("多病原: 流感阳性率与周报阳性率量级一致（差 < 15pp）",
+          diffs and max(diffs) < 15)
+    # top3 与数值排序一致（top3 由排序生成, 此处验证排序稳定性）
+    t3ok = all(r["top3_outpatient"] == [k for k, _ in sorted(r["outpatient"].items(), key=lambda kv: -kv[1])[:3]]
+               for r in mrecs if r.get("top3_outpatient"))
+    check("多病原: top3 与数值排序一致", t3ok)
+except FileNotFoundError:
+    print("SKIP 多病原数据缺失（可选）")
+
+# 10. 法定报告月度病例（图6）
+try:
+    nf = json.load(open("data/flu_notifiable.json", encoding="utf-8"))
+    nrecs = sorted(nf["records"], key=lambda r: (r["year"], r["month"]))
+    check("法定报告: 至少 24 个月记录", len(nrecs) >= 24)
+    check("法定报告: 每月 cases 非空且 >= 0",
+          all(r.get("cases") is not None and r["cases"] >= 0 for r in nrecs))
+    check("法定报告: 月份连续无断档", all(
+        (nrecs[i + 1]["year"], nrecs[i + 1]["month"]) != (nrecs[i]["year"], nrecs[i]["month"])
+        and ((nrecs[i + 1]["year"] - nrecs[i]["year"]) * 12 + nrecs[i + 1]["month"] - nrecs[i]["month"]) == 1
+        for i in range(len(nrecs) - 1)))
+    check("法定报告: 发病数量级合理（< 2000 万/月）", max(r["cases"] for r in nrecs) < 20_000_000)
+    # 图6 柱状序列可构造
+    check("法定报告: 柱状序列全非空", all(r["cases"] is not None for r in nrecs))
+except FileNotFoundError:
+    print("SKIP 法定报告数据缺失（可选）")
+
 print()
 if failures:
     print(f"共 {len(failures)} 项失败: {failures}")

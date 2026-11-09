@@ -1,0 +1,387 @@
+{
+ "meta": {
+  "source": "国家疾病预防控制局《全国(法定)传染病疫情概况》月度统计",
+  "source_url": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/list.html",
+  "updated_at": "2026-11-09 15:23 CST",
+  "latest": "2026年9月全国传染病疫情概况",
+  "note": "流行性感冒为丙类法定传染病, 报告病例数为临床诊断+实验室确诊病例, 按终审日期统计。数据仅供参考, 不构成任何医疗建议。"
+ },
+ "records": [
+  {
+   "year": 2022,
+   "month": 11,
+   "cases": 82663,
+   "deaths": 0,
+   "class_c_total": 195072,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1663431491720122368.html"
+  },
+  {
+   "year": 2022,
+   "month": 12,
+   "cases": 67888,
+   "deaths": 0,
+   "class_c_total": 130334,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1663441048043327488.html"
+  },
+  {
+   "year": 2023,
+   "month": 1,
+   "cases": 15270,
+   "deaths": 0,
+   "class_c_total": 64574,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1649669343859761152.html"
+  },
+  {
+   "year": 2023,
+   "month": 2,
+   "cases": 240687,
+   "deaths": 1,
+   "class_c_total": 347928,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1649676180541726720.html"
+  },
+  {
+   "year": 2023,
+   "month": 3,
+   "cases": 3721370,
+   "deaths": 38,
+   "class_c_total": 3863775,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1656354140817526784.html"
+  },
+  {
+   "year": 2023,
+   "month": 4,
+   "cases": 1677011,
+   "deaths": 31,
+   "class_c_total": 1810030,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1666267249690611712.html"
+  },
+  {
+   "year": 2023,
+   "month": 5,
+   "cases": 212889,
+   "deaths": 2,
+   "class_c_total": 431904,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1684439561478205440.html"
+  },
+  {
+   "year": 2023,
+   "month": 6,
+   "cases": 65289,
+   "deaths": 1,
+   "class_c_total": 623052,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1684441260049690624.html"
+  },
+  {
+   "year": 2023,
+   "month": 7,
+   "cases": 48848,
+   "deaths": 0,
+   "class_c_total": 648816,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1695998420130852864.html"
+  },
+  {
+   "year": 2023,
+   "month": 8,
+   "cases": 60530,
+   "deaths": 0,
+   "class_c_total": 400769,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1706568814483075072.html"
+  },
+  {
+   "year": 2023,
+   "month": 9,
+   "cases": 168963,
+   "deaths": 0,
+   "class_c_total": 575348,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1716605249416196096.html"
+  },
+  {
+   "year": 2023,
+   "month": 10,
+   "cases": 340969,
+   "deaths": 1,
+   "class_c_total": 629317,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1725494140437131264.html"
+  },
+  {
+   "year": 2023,
+   "month": 11,
+   "cases": 1862998,
+   "deaths": 1,
+   "class_c_total": 2043069,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1739453479981600768.html"
+  },
+  {
+   "year": 2023,
+   "month": 12,
+   "cases": 4113326,
+   "deaths": 6,
+   "class_c_total": 4238485,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1746766719346462720.html"
+  },
+  {
+   "year": 2024,
+   "month": 1,
+   "cases": 2988914,
+   "deaths": 3,
+   "class_c_total": 3110178,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1770302255702646784.html"
+  },
+  {
+   "year": 2024,
+   "month": 2,
+   "cases": 1179029,
+   "deaths": 0,
+   "class_c_total": 1319042,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1769982157846650880.html"
+  },
+  {
+   "year": 2024,
+   "month": 3,
+   "cases": 856355,
+   "deaths": 3,
+   "class_c_total": 1081905,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1782571426407886848.html"
+  },
+  {
+   "year": 2024,
+   "month": 4,
+   "cases": 441711,
+   "deaths": 0,
+   "class_c_total": 700044,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1792834031219224576.html"
+  },
+  {
+   "year": 2024,
+   "month": 5,
+   "cases": 440431,
+   "deaths": 4,
+   "class_c_total": 803034,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1806581689096187904.html"
+  },
+  {
+   "year": 2024,
+   "month": 6,
+   "cases": 314709,
+   "deaths": 1,
+   "class_c_total": 726726,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1817735919697768448.html"
+  },
+  {
+   "year": 2024,
+   "month": 7,
+   "cases": 300232,
+   "deaths": 0,
+   "class_c_total": 617431,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1828699266119217152.html"
+  },
+  {
+   "year": 2024,
+   "month": 8,
+   "cases": 169642,
+   "deaths": 0,
+   "class_c_total": 366004,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1834433420274282496.html"
+  },
+  {
+   "year": 2024,
+   "month": 9,
+   "cases": 117403,
+   "deaths": 0,
+   "class_c_total": 286123,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1848255166500679680.html"
+  },
+  {
+   "year": 2024,
+   "month": 10,
+   "cases": 103568,
+   "deaths": 0,
+   "class_c_total": 263438,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1859039988831596544.html"
+  },
+  {
+   "year": 2024,
+   "month": 11,
+   "cases": 166917,
+   "deaths": 1,
+   "class_c_total": 337242,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1868944491533684736.html"
+  },
+  {
+   "year": 2024,
+   "month": 12,
+   "cases": 1509750,
+   "deaths": 7,
+   "class_c_total": 1698431,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1879707944644890624.html"
+  },
+  {
+   "year": 2025,
+   "month": 1,
+   "cases": 2870849,
+   "deaths": 9,
+   "class_c_total": 3056174,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1890318316888248320.html"
+  },
+  {
+   "year": 2025,
+   "month": 2,
+   "cases": 1348394,
+   "deaths": 14,
+   "class_c_total": 1602707,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1904362252617027584.html"
+  },
+  {
+   "year": 2025,
+   "month": 3,
+   "cases": 354842,
+   "deaths": 1,
+   "class_c_total": 615566,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1914222311882788864.html"
+  },
+  {
+   "year": 2025,
+   "month": 4,
+   "cases": 143986,
+   "deaths": 0,
+   "class_c_total": 409387,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1925457919569465344.html"
+  },
+  {
+   "year": 2025,
+   "month": 5,
+   "cases": 115573,
+   "deaths": 0,
+   "class_c_total": 359290,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1930458943493410816.html"
+  },
+  {
+   "year": 2025,
+   "month": 6,
+   "cases": 92292,
+   "deaths": 1,
+   "class_c_total": 410296,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1941024811541499904.html"
+  },
+  {
+   "year": 2025,
+   "month": 7,
+   "cases": 78790,
+   "deaths": 0,
+   "class_c_total": 432295,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1952913634768621568.html"
+  },
+  {
+   "year": 2025,
+   "month": 8,
+   "cases": 85606,
+   "deaths": 0,
+   "class_c_total": 342026,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1963855822880935936.html"
+  },
+  {
+   "year": 2025,
+   "month": 9,
+   "cases": 157988,
+   "deaths": 0,
+   "class_c_total": 453662,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1976561324014342144.html"
+  },
+  {
+   "year": 2025,
+   "month": 10,
+   "cases": 427083,
+   "deaths": 0,
+   "class_c_total": 927859,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1986247921412509696.html"
+  },
+  {
+   "year": 2025,
+   "month": 11,
+   "cases": 4778856,
+   "deaths": 4,
+   "class_c_total": 5142613,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_1996489635242872832.html"
+  },
+  {
+   "year": 2025,
+   "month": 12,
+   "cases": 6727614,
+   "deaths": 14,
+   "class_c_total": 6961521,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2009510384572469248.html"
+  },
+  {
+   "year": 2026,
+   "month": 1,
+   "cases": 1361570,
+   "deaths": 3,
+   "class_c_total": 1620673,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2020779043559215104.html"
+  },
+  {
+   "year": 2026,
+   "month": 2,
+   "cases": 394141,
+   "deaths": 1,
+   "class_c_total": 616384,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2031644539913408512.html"
+  },
+  {
+   "year": 2026,
+   "month": 3,
+   "cases": 479991,
+   "deaths": 2,
+   "class_c_total": 740681,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2042408485003890688.html"
+  },
+  {
+   "year": 2026,
+   "month": 4,
+   "cases": 596122,
+   "deaths": 1,
+   "class_c_total": 830142,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2054121444713336832.html"
+  },
+  {
+   "year": 2026,
+   "month": 5,
+   "cases": 514726,
+   "deaths": 2,
+   "class_c_total": 795217,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2064609719542517760.html"
+  },
+  {
+   "year": 2026,
+   "month": 6,
+   "cases": 592906,
+   "deaths": 1,
+   "class_c_total": 1010999,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2074754190720536576.html"
+  },
+  {
+   "year": 2026,
+   "month": 7,
+   "cases": 969125,
+   "deaths": 3,
+   "class_c_total": 1329443,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2087859116636016640.html"
+  },
+  {
+   "year": 2026,
+   "month": 8,
+   "cases": 827013,
+   "deaths": 2,
+   "class_c_total": 1068468,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2097858855024627712.html"
+  },
+  {
+   "year": 2026,
+   "month": 9,
+   "cases": 906246,
+   "deaths": 2,
+   "class_c_total": 1123285,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2115702346450636800.html"
+  }
+ ]
+}

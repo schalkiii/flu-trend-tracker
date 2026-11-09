@@ -21,6 +21,12 @@
   --outbreak: #5d4a78;
   --baidu: #b03a2e;
   --oseltamivir: #1e8449;
+  --flu: #b03a2e;
+  --rhino: #9c6b1e;
+  --rsv: #1f618d;
+  --hmpv: #5d4a78;
+  --mycop: #1e8449;
+  --covid: #c0392b;
   --accent: #6b5b3e;
   --up: #b03a2e;
   --dn: #1e8449;
@@ -165,6 +171,8 @@ tr:hover td { background: var(--paper-2); }
   <a href="#g-pos">检测阳性率</a>
   <a href="#g-outbreak">暴发疫情</a>
   <a href="#g-city">城市搜索代理</a>
+  <a href="#g-pathogen">多病原分解</a>
+  <a href="#g-notifiable">法定报告病例</a>
   <a href="#g-detail">明细数据</a>
   <a href="#g-method">方法与限度</a>
 </div></nav>
@@ -229,6 +237,29 @@ tr:hover td { background: var(--paper-2); }
   <p class="footnote">官方哨点只到省级；城市级以百度指数「发烧」（行为代理）与「奥司他韦」（用药代理）作趋势观察，窗口为近一年逐日数据。此前对标验证：城市搜索指数与 CDC ILI% 相关系数 r≈0.85，搜索领先哨点约 1—2 周。指数为相对值，仅看趋势不看绝对量；小体量城市低于指数脱敏阈值的日子记为 0。灰色纵带为跨年边界。</p>
 </section>
 
+<section id="g-pathogen">
+  <div class="sec-head">
+    <span class="sec-no">图 5</span><h2 class="sec-title">ILI 的病原体分解：门急诊阳性率</h2>
+    <span class="sec-note">多病原哨点监测 · 11 种呼吸道病原体 · 可切换病原体</span>
+  </div>
+  <div id="pathogen-bar" style="margin-bottom:6px;"></div>
+  <div class="legend" style="padding-top:0;">
+    <span><i style="background:var(--flu)"></i>所选病原体</span>
+    <span><i style="background:var(--ink-3)"></i>ILI%（右轴参考）</span>
+  </div>
+  <div id="chart-pathogen" class="chart-box"></div>
+  <p class="footnote">哨点医院门急诊流感样病例呼吸道样本的核酸检测阳性率（%）。本图回答"ILI% 升高时，究竟是谁在流行"：流感季由流感病毒主导；淡季 ILI 平台则由鼻病毒、副流感、肠道病毒等常驻病原轮流驱动——这正是淡季搜索指数与 ILI 相关性坍缩的病原学原因。数据为中疾控《全国急性呼吸道传染病哨点监测情况》机器解析。灰色纵带为跨年边界。</p>
+</section>
+
+<section id="g-notifiable">
+  <div class="sec-head">
+    <span class="sec-no">图 6</span><h2 class="sec-title">法定报告：流感月度发病数</h2>
+    <span class="sec-note">国家疾控局传染病疫情概况 · 丙类法定报告 · 月度</span>
+  </div>
+  <div id="chart-notifiable" class="chart-box"></div>
+  <p class="footnote">流行性感冒为丙类法定传染病，本图为全国报告发病数（临床诊断 + 实验室确诊，按终审日期统计）。年度冬季峰单月可达数百万例，为哨点百分比指标之外提供了绝对量级的锚点。报告数受就诊率与检测量影响，低于实际感染水平。数据自 2022-11 起，随国家疾控局月度概况发布更新。</p>
+</section>
+
 <section id="g-detail">
   <div class="sec-head">
     <span class="sec-no">表 1</span><h2 class="sec-title">周报明细</h2>
@@ -252,12 +283,14 @@ tr:hover td { background: var(--paper-2); }
     <li style="margin-bottom:10px;"><b>城市级是代理指标，不是监测值。</b> 官方哨点仅覆盖到省级。城市曲线取百度指数「发烧」「奥司他韦」两个关键词，是居民行为的代理观察，量纲与哨点数据不可直接比较。</li>
     <li style="margin-bottom:10px;"><b>领先—滞后关系。</b> 对标验证显示搜索指数与 CDC 哨点 ILI% 高度相关（r≈0.85）且领先约 1—2 周：搜索在就诊之前发生。这使城市搜索曲线可用于观察苗头，但只看趋势方向，不看绝对水平。</li>
     <li style="margin-bottom:10px;"><b>数据更新节奏。</b> 全国数据随周报发布（约滞后一周）；城市搜索数据由本地流水线采集，覆盖近一年逐日（滚动更新）。两者的时间窗与口径各自独立。</li>
+    <li style="margin-bottom:10px;"><b>多病原分解（图 5）。</b> 来自中疾控《全国急性呼吸道传染病哨点监测情况》（2024 年第 46 周起），为门急诊流感样病例呼吸道样本的 11 种病原体核酸检测阳性率。它与图 1 的 ILI% 口径不同：ILI% 衡量"流感样症状就诊占比"，本图衡量"这些就诊样本中各病原体检出占比"。ILI% 升高而流感阳性率不升，说明症状由其他病原驱动。2025 年 4—5 月为多月合并发布，已拆为逐周记录。</li>
+    <li style="margin-bottom:10px;"><b>法定报告病例（图 6）。</b> 来自国家疾控局《全国法定传染病疫情概况》月度统计（2022 年 11 月起），为丙类法定报告的流感发病数与死亡数。注意三点口径差异：①按终审日期而非发病日期统计；②只计入就诊并完成报告的病例，低于实际感染水平；③月度粒度与周度哨点指标不可直接对齐，仅作量级锚点。</li>
     <li><b>限度。</b> 周报数据可能后向修订；搜索指数受新闻事件、舆论热度影响，并非全部由真实病例驱动。本页为描述性监测，不构成任何医疗建议。</li>
   </ol>
 </section>
 
 <div class="disclosure">
-  <b>数据与复现。</b> 全国指标来自 <a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/" target="_blank" rel="noopener" style="color:var(--ink)">国家流感中心周报</a>，城市指标来自百度指数公开查询。全部数据由仓库内流水线自动抓取解析，可复现。本页为信息整理，不构成医疗建议；如有症状请就医并遵循医嘱。生成于 <span id="gen-time"></span>。
+  <b>数据与复现。</b> 全国指标来自 <a href="https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/" target="_blank" rel="noopener" style="color:var(--ink)">国家流感中心周报</a>，多病原数据来自 <a href="https://www.chinacdc.cn/jksj/jksj04_14275/" target="_blank" rel="noopener" style="color:var(--ink)">中疾控哨点监测</a>，法定报告数据来自 <a href="https://www.ndcpa.gov.cn/jbkzzx/c100016/common/list.html" target="_blank" rel="noopener" style="color:var(--ink)">国家疾控局月度概况</a>，城市指标来自百度指数公开查询。全部数据由仓库内流水线自动抓取解析，可复现。本页为信息整理，不构成医疗建议；如有症状请就医并遵循医嘱。生成于 <span id="gen-time"></span>。
 </div>
 
 </main>
@@ -506,7 +539,154 @@ function setCityRange(btn) {
   renderCity();
 }
 
-/* ---------- 启动 ---------- */
+/* ---------- 双轴折线图（图5: 病原体 + ILI% 参考线）---------- */
+function dualAxisChart(el, mainSeries, refSeries) {
+  const W = Math.min(el.parentElement.clientWidth, 1020);
+  const H = 300, PL = 44, PR = 56, PT = 14, PB = 30;
+  const mainY = mainSeries.points.map(p => p.y).filter(v => v != null);
+  const refY = refSeries.points.map(p => p.y).filter(v => v != null);
+  if (!mainY.length && !refY.length) { el.innerHTML = ""; return; }
+  const mMax = Math.max(1, ...mainY) * 1.12, mMin = 0;
+  const rMax = Math.max(1, ...refY) * 1.12, rMin = Math.min(0, ...refY);
+  const n = mainSeries.points.length;
+  const xAt = i => PL + (n <= 1 ? 0 : i * (W - PL - PR) / (n - 1));
+  const mAt = v => PT + (mMax - v) * (H - PT - PB) / (mMax - mMin);
+  const rAt = v => PT + (rMax - v) * (H - PT - PB) / (rMax - rMin);
+
+  let bands = "";
+  const yrs = mainSeries.points.map(p => p.year).filter(y => y != null);
+  for (let i = 1; i < yrs.length; i++) {
+    if (yrs[i] !== yrs[i - 1]) {
+      const x = (xAt(i - 1) + xAt(i)) / 2;
+      bands += `<line x1="${x}" y1="${PT}" x2="${x}" y2="${H - PB}" stroke="${C.yearBand}" stroke-width="10"/>`;
+    }
+  }
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">` + bands;
+  for (let g = 0; g <= 4; g++) {
+    const v = mMin + (mMax - mMin) * g / 4, y = mAt(v);
+    svg += `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}" stroke="${C.grid}" stroke-width="1"/>`;
+    svg += `<text x="${PL - 6}" y="${y + 4}" fill="${C.ink3}" font-size="10.5" text-anchor="end" font-family="Consolas,monospace">${v.toFixed(1)}%</text>`;
+    const rv = rMin + (rMax - rMin) * g / 4;
+    svg += `<text x="${W - PR + 8}" y="${y + 4}" fill="${C.ink3}" font-size="10.5" font-family="Consolas,monospace">${rv.toFixed(1)}</text>`;
+  }
+  const labelIdx = [];
+  mainSeries.points.forEach((p, i) => { if (p.x != null) labelIdx.push(i); });
+  (labelIdx.length && labelIdx.length <= 14 ? labelIdx : [0, Math.floor((n - 1) / 2), n - 1]).forEach(i => {
+    const lb = mainSeries.points[i];
+    if (lb && lb.x != null)
+      svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x}</text>`;
+  });
+
+  function drawSeries(s, yMap, width, dash) {
+    const seg = s.points.map((p, i) => ({ x: xAt(i), y: p.y == null ? null : yMap(p.y) })).filter(p => p.y != null);
+    if (seg.length > 1) {
+      svg += `<polyline points="${seg.map(p => p.x.toFixed(1) + "," + p.y.toFixed(1)).join(" ")}" fill="none" stroke="${s.color}" stroke-width="${width}" stroke-linejoin="round" stroke-linecap="round"${dash ? ` stroke-dasharray="5 4"` : ""}/>`;
+    }
+    const last = seg[seg.length - 1];
+    if (last) {
+      svg += `<text x="${Math.min(last.x + 7, W - 8)}" y="${last.y + 4}" fill="${s.color}" font-size="11" font-weight="700" font-family="Consolas,monospace">${last.v == null ? "" : last.v.toFixed(1)}%</text>`;
+    }
+  }
+  // 参考线(ILI%, 灰虚线)先画, 主病原体线覆盖其上
+  drawSeries(refSeries, rAt, 1.4, true);
+  drawSeries(mainSeries, mAt, 2.2, false);
+  // 重画主线的末值标签（参考线可能覆盖）
+  const lastMain = mainSeries.points.map((p, i) => ({ i, v: p.y })).filter(p => p.v != null).pop();
+  if (lastMain != null) {
+    svg += `<circle cx="${xAt(lastMain.i).toFixed(1)}" cy="${mAt(lastMain.v).toFixed(1)}" r="2.8" fill="${mainSeries.color}"/>`;
+  }
+  svg += "</svg>";
+  el.innerHTML = svg;
+}
+
+/* ---------- 多病原（图5）---------- */
+let mpData = null;
+let activePathogen = "流感病毒";
+
+const PATHOGEN_ORDER = [
+  "流感病毒", "鼻病毒", "新型冠状病毒", "呼吸道合胞病毒", "人偏肺病毒",
+  "副流感病毒", "腺病毒", "普通冠状病毒", "肠道病毒", "博卡病毒", "肺炎支原体",
+];
+const PATHOGEN_COLOR = {
+  "流感病毒": C.south, "鼻病毒": C.all, "新型冠状病毒": "#c0392b",
+  "呼吸道合胞病毒": C.north, "人偏肺病毒": "#5d4a78", "副流感病毒": "#148f77",
+  "腺病毒": "#a04000", "普通冠状病毒": "#7f8c8d", "肠道病毒": "#af601a",
+  "博卡病毒": "#5499c7", "肺炎支原体": C.oseltamivir,
+};
+
+function renderPathogen() {
+  const bar = document.getElementById("pathogen-bar");
+  const chartEl = document.getElementById("chart-pathogen");
+  if (!mpData || !mpData.records || !mpData.records.length) {
+    bar.innerHTML = "";
+    chartEl.innerHTML = `<div style="padding:18px 6px;color:var(--ink-3);font-size:13px">多病原数据尚未采集。</div>`;
+    return;
+  }
+  bar.innerHTML = PATHOGEN_ORDER.map(p =>
+    `<span class="range-btn${p === activePathogen ? " active" : ""}" data-pathogen="${p}" onclick="setPathogen(this)">${p}</span>`
+  ).join("");
+
+  const rs = mpData.records;
+  const labels = rs.map(r => r.week >= 27 || r.week <= 6 || rs.length <= 60
+    ? `${String(r.week).padStart(2, "0")}周` : null);
+  dualAxisChart(chartEl,
+    { color: PATHOGEN_COLOR[activePathogen] || C.south, points: rs.map((r, i) => ({ x: labels[i], y: (r.outpatient || {})[activePathogen] ?? null, year: r.year })) },
+    { color: "#85929e", points: rs.map((r, i) => ({ x: labels[i], y: r.ili_pct ?? null, year: r.year })) },
+  );
+}
+
+function setPathogen(btn) {
+  activePathogen = btn.dataset.pathogen;
+  renderPathogen();
+}
+
+/* ---------- 法定报告（图6）---------- */
+let nfData = null;
+
+function renderNotifiable() {
+  const chartEl = document.getElementById("chart-notifiable");
+  if (!nfData || !nfData.records || !nfData.records.length) {
+    chartEl.innerHTML = `<div style="padding:18px 6px;color:var(--ink-3);font-size:13px">法定报告数据尚未采集。</div>`;
+    return;
+  }
+  const rs = nfData.records;
+  const fmt = v => v >= 10000 ? (v / 10000).toFixed(v >= 100000 ? 0 : 1) + "万" : String(Math.round(v));
+  barChartWan(chartEl, rs.map(r => ({ x: `${r.year}-${String(r.month).padStart(2, "0")}`, y: r.cases })), "#b03a2e", fmt);
+}
+
+/* 柱状图（万级数值格式化版, x 轴稀疏月份标签）*/
+function barChartWan(el, points, color, fmt) {
+  const W = Math.min(el.parentElement.clientWidth, 1020);
+  const H = 260, PL = 52, PR = 56, PT = 14, PB = 30;
+  const yMax = Math.max(...points.map(p => p.y)) * 1.12;
+  const n = points.length;
+  const bw = Math.max(2, Math.min(14, (W - PL - PR) / n * 0.6));
+  const xAt = i => PL + (i + 0.5) * (W - PL - PR) / n;
+  const yAt = v => PT + (yMax - v) * (H - PT - PB) / yMax;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+  for (let g = 0; g <= 4; g++) {
+    const v = yMax * g / 4, y = yAt(v);
+    svg += `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}" stroke="${C.grid}" stroke-width="1"/>`;
+    svg += `<text x="${PL - 6}" y="${y + 4}" fill="${C.ink3}" font-size="10.5" text-anchor="end" font-family="Consolas,monospace">${fmt(v)}</text>`;
+  }
+  // x 标签: 每年 1 月 + 首尾
+  const labelSet = new Set([0, n - 1]);
+  points.forEach((p, i) => { if (p.x.endsWith("-01")) labelSet.add(i); });
+  points.forEach((p, i) => {
+    const y = yAt(p.y);
+    svg += `<rect x="${(xAt(i) - bw / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${(H - PB - y).toFixed(1)}" fill="${color}" opacity="0.85"/>`;
+    if (labelSet.has(i)) {
+      svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${p.x}</text>`;
+    }
+  });
+  const last = points[n - 1];
+  svg += `<text x="${Math.min(xAt(n - 1) + 7, W - 8)}" y="${yAt(last.y) + 4}" fill="${color}" font-size="11" font-weight="700" font-family="Consolas,monospace">${fmt(last.y)}</text>`;
+  svg += "</svg>";
+  el.innerHTML = svg;
+}
+
+
 document.getElementById("gen-time").textContent = new Date().toLocaleString("zh-CN", { hour12: false });
 document.querySelector("#tbl thead th").addEventListener("click", () => {
   showAllRows = !showAllRows;
@@ -529,6 +709,16 @@ fetch("data/flu_cities.json")
   .then(r => { if (!r.ok) return null; return r.json(); })
   .then(d => { cityData = d; renderCity(); })
   .catch(() => { cityData = null; renderCity(); });
+
+fetch("data/flu_multipathogen.json")
+  .then(r => { if (!r.ok) return null; return r.json(); })
+  .then(d => { mpData = d; renderPathogen(); })
+  .catch(() => { mpData = null; renderPathogen(); });
+
+fetch("data/flu_notifiable.json")
+  .then(r => { if (!r.ok) return null; return r.json(); })
+  .then(d => { nfData = d; renderNotifiable(); })
+  .catch(() => { nfData = null; renderNotifiable(); });
 </script>
 </body>
 </html>

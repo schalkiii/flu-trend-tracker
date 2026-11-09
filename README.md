@@ -10,6 +10,8 @@
 - 流感病毒检测阳性率走势（南方 / 北方 / 全国）
 - 流感样病例暴发疫情周报起数
 - **城市级趋势（百度指数代理）**：15 城 × 「发烧」「奥司他韦」双关键词，近一年逐日，城市切换 + 时间缩放
+- **多病原分解（中疾控哨点监测）**：11 种呼吸道病原体门急诊阳性率（2024W46 起，103 周），病原体切换，叠 ILI% 双轴参考
+- **法定报告流感月度发病数（国家疾控局）**：丙类法定传染病报告病例数（2022-11 起，47 个月）
 - 明细数据表（含 A/B 型别构成、暴发起数）
 
 数据为官方公开周报的机器解析结果，仅供参考，不构成任何医疗建议。
@@ -17,15 +19,19 @@
 ## 架构
 
 ```
-.github/workflows/update-data.yml   GitHub Actions: 每周五自动抓取（CDC）
-scripts/fetch_cdc.py                CDC 抓取 + PDF 解析（列表分页可回溯到 2015 年）
+.github/workflows/update-data.yml   GitHub Actions: 每周五自动抓取（CDC + 多病原 + 法定报告）
+scripts/fetch_cdc.py                国家流感中心周报抓取 + PDF 解析（列表分页可回溯到 2015 年）
+scripts/fetch_multipathogen.py      中疾控哨点监测抓取（HTML 表格结构化解析, 11 病原体 × 门急诊/住院）
+scripts/fetch_notifiable.py         国家疾控局月报抓取（法定传染病流感发病数/死亡数）
 scripts/fetch_baidu_fast.py         城市级采集 · 现役主路线（webbridge 凭证 + 本地直连）
 scripts/fetch_baidu_via_browser.py  城市级采集 · 备用慢路线（webbridge UI 交互，仅 5 城码表）
 scripts/run_browser_fetch.sh        webbridge daemon 托管入口（起 daemon → 等扩展 → 调主路线）
 data/flu_national.json              全国/南北数据（每次更新提交回仓库）
 data/flu_cities.json                城市级数据（增量合并，一年逐日）
+data/flu_multipathogen.json         多病原哨点监测（2024W46 起, 增量合并）
+data/flu_notifiable.json            法定报告月度病例（2022-11 起, 增量合并）
 index.html                          自包含单页（内联 CSS/JS, 手写 SVG 图表, 无外部依赖）
-verify_page.py                      数据完整性断言（CI 中强制执行, 30 项）
+verify_page.py                      数据完整性断言（CI 中强制执行, 43 项）
 tests/test_parse_pdf.py             CDC PDF 解析 golden 回归（4 类措辞变体）
 AUDIT-REPORT-2026-11-09.md          项目审计报告
 ```
@@ -33,6 +39,18 @@ AUDIT-REPORT-2026-11-09.md          项目审计报告
 - 定时任务每周五（UTC 16:10 / 北京时间周六 00:10）运行，`--pages 4 --weeks 80` 增量维护
   两年窗口，已解析期次自动跳过；数据有变化才 commit，commit 触发 GitHub Pages 重新部署。
 - 页面零外部依赖（无 CDN、无框架），适配移动端。
+
+## 多病原与法定报告数据说明
+
+- **多病原**（`fetch_multipathogen.py`）：中疾控《全国急性呼吸道传染病哨点监测情况》
+  （chinacdc.cn），HTML 表格结构化解析（`<table>/<tr>/<td>` 逐行提取，容忍 PDF 转写
+  断字噪声如 `+ 2.2`、`鼻 病毒`、跨 span 断字、`第 4 2周`）。2025 年 4—5 月为多月
+  合并发布宽表，已拆为逐周记录（该段无 ILI%）。103 周 × 11 病原体全部齐全，
+  流感阳性率与国家流感中心周报 spot check 一致（差 < 15pp，口径差异）。
+- **法定报告**（`fetch_notifiable.py`）：国家疾控局《全国（法定）传染病疫情概况》
+  （ndcpa.gov.cn），列表页为 JS 渲染、文章数据以 JSON 内嵌，按对象切分解析。
+  47 个月（2022-11 起）连续无断档，官方公报数字 spot check 全部命中。
+- 两个数据源的抓取频率均随 CI 每周一次，缓存目录 `scripts/cache/mp/`、`scripts/cache/nf/`。
 
 ## 城市级数据采集（百度指数 · 现役路线）
 
@@ -78,6 +96,8 @@ python -m http.server 8080                         # 本地预览 http://localho
 
 - [x] 城市级趋势：百度指数（"发烧""奥司他韦"关键词，城市粒度代理指标）
 - [x] 历史数据回填（两年窗口 100 期在库，CI 增量维护）
+- [x] 多病原分解：中疾控哨点监测 11 病原体门急诊阳性率（2024W46 起）
+- [x] 法定报告流感月度发病数：国家疾控局月报（2022-11 起）
 - [ ] 新冠月度数据（中疾控"全国新型冠状病毒感染疫情情况"）
 - [ ] 微信小程序版（需企业主体或走云开发）
 
