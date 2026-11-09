@@ -195,6 +195,10 @@ tr:hover td { background: var(--paper-2); }
     <span class="range-btn" data-range="52" onclick="setRange(this)">近1年</span>
     <span class="range-btn" data-range="26" onclick="setRange(this)">近半年</span>
   </div>
+  <div class="legend" style="padding-top:0;">
+    <span><i style="background:var(--south)"></i>南方省份</span>
+    <span><i style="background:var(--north)"></i>北方省份</span>
+  </div>
   <div id="chart-ili" class="chart-box"></div>
   <p class="footnote">南方省份通常先于北方进入流感季（冬季高峰），ILI% 突破基线并连续抬升是季节性流行的起点标记。灰色纵带为跨年边界。</p>
 </section>
@@ -203,6 +207,11 @@ tr:hover td { background: var(--paper-2); }
   <div class="sec-head">
     <span class="sec-no">图 2</span><h2 class="sec-title">流感病毒检测阳性率</h2>
     <span class="sec-note">监测网络实验室 · 南方 / 北方 / 全国</span>
+  </div>
+  <div class="legend">
+    <span><i style="background:var(--south)"></i>南方</span>
+    <span><i style="background:var(--north)"></i>北方</span>
+    <span><i style="background:var(--all)"></i>全国</span>
   </div>
   <div id="chart-pos" class="chart-box"></div>
   <p class="footnote">阳性率是比 ILI% 更特异的病原学指标：ILI% 升高而阳性率平稳，多为其他呼吸道病原；两者同步抬升才是实验室确认的流感活动。</p>
