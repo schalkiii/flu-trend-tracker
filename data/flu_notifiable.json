@@ -2,8 +2,8 @@
  "meta": {
   "source": "国家疾病预防控制局《全国(法定)传染病疫情概况》月度统计",
   "source_url": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/list.html",
-  "updated_at": "2026-11-09 15:23 CST",
-  "latest": "2026年9月全国传染病疫情概况",
+  "updated_at": "2026-11-13 06:12 CST",
+  "latest": "2026年10月全国传染病疫情概况",
   "note": "流行性感冒为丙类法定传染病, 报告病例数为临床诊断+实验室确诊病例, 按终审日期统计。数据仅供参考, 不构成任何医疗建议。"
  },
  "records": [
@@ -382,6 +382,14 @@
    "deaths": 2,
    "class_c_total": 1123285,
    "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2115702346450636800.html"
+  },
+  {
+   "year": 2026,
+   "month": 10,
+   "cases": 809976,
+   "deaths": 1,
+   "class_c_total": 1034200,
+   "source": "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_2120098785175965696.html"
   }
  ]
 }
