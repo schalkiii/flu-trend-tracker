@@ -346,16 +346,26 @@ function lineChart(el, series, opts) {
     svg += `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}" stroke="${C.grid}" stroke-width="1"/>`;
     svg += `<text x="${PL - 6}" y="${y + 4}" fill="${C.ink3}" font-size="10.5" text-anchor="end" font-family="Consolas,monospace">${(opts.yFmt || (v => v))(v)}</text>`;
   }
-  // 稀疏标签（如月份刻度, 非空≤14个）全画; 密标签退回首/中/尾 3 个
+  // x 轴刻度: 均匀 7 个(不足 7 个数据点则全画)。labels 两行时(周+日期)下行再加 10px
   const labelIdx = [];
   series[0].points.forEach((p, i) => { if (p.x != null) labelIdx.push(i); });
-  const drawX = opts.xIdx || (labels_n => labelIdx.length && labelIdx.length <= 14
-    ? labelIdx
-    : [0, Math.floor((labels_n - 1) / 2), labels_n - 1]);
-  drawX(n).forEach(i => {
+  const defaultTicks = labels_n => {
+    const avail = labelIdx.length && labelIdx.length <= 14 ? labelIdx : null;
+    if (avail) return avail;
+    const t = Math.min(7, labels_n);
+    return Array.from({ length: t }, (_, k) => Math.round(k * (labels_n - 1) / (t - 1)));
+  };
+  const tickList = (opts.xIdx ? opts.xIdx(n) : null) || defaultTicks(n);
+  tickList.forEach(i => {
     const lb = series[0].points[i];
-    if (lb && lb.x != null)
-      svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x}</text>`;
+    if (lb && lb.x != null) {
+      if (typeof lb.x === "object") {   // 两行: 周号 / 截止日
+        svg += `<text x="${xAt(i)}" y="${H - 19}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x.w}</text>`;
+        svg += `<text x="${xAt(i)}" y="${H - 7}" fill="${C.ink3}" font-size="9.5" text-anchor="middle" opacity="0.8">${lb.x.d}</text>`;
+      } else {
+        svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x}</text>`;
+      }
+    }
   });
   for (const s of series) {
     const seg = s.points.map((p, i) => ({ i, v: p.y, x: xAt(i), y: p.y == null ? null : yAt(p.y) })).filter(p => p.v != null);
@@ -397,8 +407,16 @@ function barChart(el, points, color) {
   });
   const last = points[n - 1];
   svg += `<text x="${Math.min(xAt(n - 1) + 7, W - 8)}" y="${yAt(last.y) + 4}" fill="${color}" font-size="11" font-weight="700" font-family="Consolas,monospace">${last.y}</text>`;
-  [0, Math.floor((n - 1) / 2), n - 1].forEach(i => {
-    svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${points[i].x}</text>`;
+  // x 轴刻度: 均匀 7 个; 两行对象标签(周+日期)分行画
+  const t = Math.min(7, n);
+  Array.from({ length: t }, (_, k) => Math.round(k * (n - 1) / (t - 1))).forEach(i => {
+    const lb = points[i].x;
+    if (typeof lb === "object") {
+      svg += `<text x="${xAt(i)}" y="${H - 19}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.w}</text>`;
+      svg += `<text x="${xAt(i)}" y="${H - 7}" fill="${C.ink3}" font-size="9.5" text-anchor="middle" opacity="0.8">${lb.d}</text>`;
+    } else {
+      svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb}</text>`;
+    }
   });
   svg += "</svg>";
   el.innerHTML = svg;
@@ -419,10 +437,28 @@ function deltaHTML(cur, prev, unit) {
   return `<span class="${cls}">${d > 0 ? "↑" : "↓"} ${sign}${Math.abs(d).toFixed(1)}${unit}</span> 环比上期`;
 }
 
+/* ---------- ISO 周历: 周号 <-> 日期 ---------- */
+function isoWeekStart(year, week) {
+  const d = new Date(year, 0, 4);            // 1月4日恒在第1周
+  const mon = (d.getDay() + 6) % 7;          // 周一=0
+  d.setDate(d.getDate() - mon + (week - 1) * 7);
+  return d;
+}
+function weekEndDate(year, week) { const d = isoWeekStart(year, week); d.setDate(d.getDate() + 6); return d; }
+function fmtMD(d) { return (d.getMonth() + 1) + "." + d.getDate(); }
+/* 图表刻度: 两行标签, 行1 周号(年初带年份), 行2 周截止日 */
+function weekTickLabel(r) {
+  return { w: r.week <= 10 ? r.year + "·" + r.week + "周" : r.week + "周", d: fmtMD(weekEndDate(r.year, r.week)) };
+}
+/* 文本描述: "2026年第45周（11.09-11.15）" */
+function weekFull(r) {
+  return r.year + "年第" + r.week + "周（" + fmtMD(isoWeekStart(r.year, r.week)) + "-" + fmtMD(weekEndDate(r.year, r.week)) + "）";
+}
+
 /* ---------- 全国渲染 ---------- */
 function renderNational() {
   const last = recs[recs.length - 1], prev = recs[recs.length - 2];
-  document.getElementById("latest-badge").textContent = `${last.year}年第${last.week}周`;
+  document.getElementById("latest-badge").textContent = weekFull(last);
 
   const gauges = [
     { label: "南方省份 ILI%", v: last.south_ili_pct, p: prev.south_ili_pct, unit: "%", dU: "pp", sub: "哨点医院门急诊占比" },
@@ -449,8 +485,7 @@ function viewRecs() {
 
 function drawILI() {
   const rs = viewRecs();
-  const labels = rs.map(r => r.week >= 27 || r.week <= 6 || rs.length <= 60
-    ? `${String(r.week).padStart(2, "0")}周` : null);
+  const labels = rs.map(r => weekTickLabel(r));
   lineChart(document.getElementById("chart-ili"), [
     { name: "南方", color: C.south, points: rs.map((r, i) => ({ x: labels[i], y: r.south_ili_pct, year: r.year })) },
     { name: "北方", color: C.north, points: rs.map((r, i) => ({ x: labels[i], y: r.north_ili_pct, year: r.year })) },
@@ -459,7 +494,7 @@ function drawILI() {
 
 function drawPos() {
   const rs = viewRecs();
-  const labels = rs.map(r => `${String(r.week).padStart(2, "0")}周`);
+  const labels = rs.map(r => weekTickLabel(r));
   lineChart(document.getElementById("chart-pos"), [
     { name: "南方", color: C.south, points: rs.map((r, i) => ({ x: labels[i], y: r.south_pos_rate, year: r.year })) },
     { name: "北方", color: C.north, points: rs.map((r, i) => ({ x: labels[i], y: r.north_pos_rate, year: r.year })) },
@@ -470,7 +505,7 @@ function drawPos() {
 function drawOutbreak() {
   const rs = viewRecs();
   barChart(document.getElementById("chart-outbreak"),
-    rs.map(r => ({ x: `${String(r.week).padStart(2, "0")}周`, y: r.outbreaks })), C.outbreak);
+    rs.map(r => ({ x: weekTickLabel(r), y: r.outbreaks })), C.outbreak);
 }
 
 let showAllRows = false;
@@ -479,7 +514,7 @@ function drawTable() {
   const tb = document.querySelector("#tbl tbody");
   tb.innerHTML = shown.slice().reverse().map(r => `
     <tr>
-      <td>${r.year}年 第${r.week}周</td>
+      <td>${r.year}年 第${r.week}周<br><span style="font-size:11px;color:var(--ink-3)">${fmtMD(isoWeekStart(r.year, r.week))}-${fmtMD(weekEndDate(r.year, r.week))}</span></td>
       <td class="num">${r.south_ili_pct ?? "—"}</td>
       <td class="num">${r.north_ili_pct ?? "—"}</td>
       <td class="num">${r.south_pos_rate ?? "—"}%</td>
@@ -533,7 +568,11 @@ function renderCity() {
   lineChart(chartEl, [
     { name: "发烧", color: C.baidu, points: dates.map((d, i) => ({ x: labels[i], y: cd.kw_发烧[d], year: +d.slice(0, 4) })) },
     { name: "奥司他韦", color: C.oseltamivir, points: dates.map((d, i) => ({ x: labels[i], y: (cd.kw_奥司他韦 || {})[d] ?? null, year: +d.slice(0, 4) })) },
-  ], { yFmt: v => Math.round(v), noDots: dates.length > 120 });
+  ], { yFmt: v => Math.round(v), noDots: dates.length > 120, xIdx: n => {
+    // 逐日模式(≤45天)密标签太多时退回 7 个均匀刻度
+    if (!monthly && n > 14) return Array.from({ length: 7 }, (_, k) => Math.round(k * (n - 1) / 6));
+    return null;   // null = 使用默认逻辑(稀疏标签全画)
+  } });
 }
 
 function setCity(btn) {
@@ -581,10 +620,19 @@ function dualAxisChart(el, mainSeries, refSeries) {
   }
   const labelIdx = [];
   mainSeries.points.forEach((p, i) => { if (p.x != null) labelIdx.push(i); });
-  (labelIdx.length && labelIdx.length <= 14 ? labelIdx : [0, Math.floor((n - 1) / 2), n - 1]).forEach(i => {
+  const tickIdx = (labelIdx.length && labelIdx.length <= 14)
+    ? labelIdx
+    : Array.from({ length: Math.min(7, n) }, (_, k) => Math.round(k * (n - 1) / Math.min(7, n === 1 ? 1 : n - 1)));
+  tickIdx.forEach(i => {
     const lb = mainSeries.points[i];
-    if (lb && lb.x != null)
-      svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x}</text>`;
+    if (lb && lb.x != null) {
+      if (typeof lb.x === "object") {
+        svg += `<text x="${xAt(i)}" y="${H - 19}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x.w}</text>`;
+        svg += `<text x="${xAt(i)}" y="${H - 7}" fill="${C.ink3}" font-size="9.5" text-anchor="middle" opacity="0.8">${lb.x.d}</text>`;
+      } else {
+        svg += `<text x="${xAt(i)}" y="${H - 8}" fill="${C.ink3}" font-size="10.5" text-anchor="middle">${lb.x}</text>`;
+      }
+    }
   });
 
   function drawSeries(s, yMap, width, dash) {
@@ -637,8 +685,7 @@ function renderPathogen() {
   ).join("");
 
   const rs = mpData.records;
-  const labels = rs.map(r => r.week >= 27 || r.week <= 6 || rs.length <= 60
-    ? `${String(r.week).padStart(2, "0")}周` : null);
+  const labels = rs.map(r => weekTickLabel(r));
   dualAxisChart(chartEl,
     { color: PATHOGEN_COLOR[activePathogen] || C.south, points: rs.map((r, i) => ({ x: labels[i], y: (r.outpatient || {})[activePathogen] ?? null, year: r.year })) },
     { color: "#85929e", points: rs.map((r, i) => ({ x: labels[i], y: r.ili_pct ?? null, year: r.year })) },
@@ -679,9 +726,11 @@ function barChartWan(el, points, color, fmt) {
     svg += `<line x1="${PL}" y1="${y}" x2="${W - PR}" y2="${y}" stroke="${C.grid}" stroke-width="1"/>`;
     svg += `<text x="${PL - 6}" y="${y + 4}" fill="${C.ink3}" font-size="10.5" text-anchor="end" font-family="Consolas,monospace">${fmt(v)}</text>`;
   }
-  // x 标签: 每年 1 月 + 首尾
+  // x 标签: 每年 1 月 + 首尾 + 均匀补齐(共约 12 个)
   const labelSet = new Set([0, n - 1]);
   points.forEach((p, i) => { if (p.x.endsWith("-01")) labelSet.add(i); });
+  const extra = Math.max(0, 12 - labelSet.size);
+  for (let k = 1; k <= extra; k++) labelSet.add(Math.round(k * (n - 1) / (extra + 1)));
   points.forEach((p, i) => {
     const y = yAt(p.y);
     svg += `<rect x="${(xAt(i) - bw / 2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${(H - PB - y).toFixed(1)}" fill="${color}" opacity="0.85"/>`;
@@ -706,7 +755,7 @@ fetch("data/flu_national.json")
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(d => {
     recs = d.records.slice().sort((a, b) => a.year - b.year || a.week - b.week);
-    document.title = `流感监测周报追踪 · ${recs[recs.length - 1].year}年第${recs[recs.length - 1].week}周`;
+    document.title = `流感监测周报追踪 · ${weekFull(recs[recs.length - 1])}`;
     renderNational();
   })
   .catch(e => {

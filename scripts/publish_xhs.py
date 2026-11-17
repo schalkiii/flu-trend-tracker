@@ -98,6 +98,15 @@ def main() -> None:
     print(f"\n发布结果: {json.dumps(result, ensure_ascii=False)[:400]}")
 
 
+def week_range(year: int, week: int) -> str:
+    """ISO 周历 -> '11.9-11.15' 日期范围。"""
+    from datetime import date, timedelta
+    d = date(year, 1, 4)
+    start = d - timedelta(days=d.isoweekday() - 1) + timedelta(weeks=week - 1)
+    end = start + timedelta(days=6)
+    return f"{start.month}.{start.day}-{end.month}.{end.day}"
+
+
 def build_content() -> tuple[str, str]:
     """从 data/*.json 读最新数据组装文案。"""
     nat = json.loads((PROJECT_ROOT / "data" / "flu_national.json").read_text(encoding="utf-8"))
@@ -123,7 +132,7 @@ def build_content() -> tuple[str, str]:
         f"{p}{v}%" for p, v in zip(top3, top3_vals) if v is not None)
 
     body_lines = [
-        f"🤧 流感监测周报追踪 · {last['year']}年第{last['week']}周（{last.get('publish_date', '')}发布）",
+        f"🤧 流感监测周报追踪 · {last['year']}年第{last['week']}周（{week_range(last['year'], last['week'])}）",
         "",
         "【本周要点】",
         f"· 南方ILI% {last['south_ili_pct']}%（环比{'+' if d_ili >= 0 else ''}{d_ili:.1f}pct），北方 {last['north_ili_pct']}%",

@@ -41,7 +41,14 @@ gauges = [
     ("暴发起数", last["outbreaks"], prev["outbreaks"]),
 ]
 check("4 张 gauge 均可计算涨跌", all(delta_class(g[1], g[2]) in ("up", "down", "flat") for g in gauges))
-check("最新期为 2026 年 44 周及以后", (last["year"], last["week"]) >= (2026, 44))
+# 最新期新鲜度: ISO 周历换算为日期, 距今不超过 2 周(官方周四周发布, 容忍一个发布周期)
+from datetime import date, timedelta
+def iso_week_start(year, week):
+    d = date(year, 1, 4)                       # 1月4日恒在第1周
+    return d - timedelta(days=d.isoweekday() - 1) + timedelta(weeks=week - 1)
+_latest = iso_week_start(last["year"], last["week"])
+_age_days = (date.today() - _latest).days
+check(f"最新期新鲜（{_latest} 起始, 距今 {_age_days} 天 ≤ 21）", 0 <= _age_days <= 21)
 
 # 4. 图表序列构造（JS 中 series points 全部有值才画线）
 check("ILI 图 2 条序列全非空", all(r["south_ili_pct"] is not None and r["north_ili_pct"] is not None for r in recs))

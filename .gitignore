@@ -7,4 +7,6 @@ _chk*
 shots/
 out/
 _marked_snapshot.html
-
+# CDP 渲染验证临时目录
+_cdp_profile*/
+scripts/_cdp_profile*/

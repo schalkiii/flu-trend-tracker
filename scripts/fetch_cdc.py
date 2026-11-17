@@ -13,28 +13,17 @@ fetch_cdc.py — 抓取中国国家流感中心《中国流感监测周报》并
 已解析的期次写入 PDF 缓存目录, 增量运行不重复下载。
 """
 
+import argparse
 import json
 import re
 import sys
-import urllib.request
-from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+from common import CST, UA, ROOT, http_get, now_cst, write_data, load_data
+
 BASE = "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/"
-UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/120.0 Safari/537.36")
-ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "data" / "flu_national.json"
 CACHE_DIR = ROOT / "scripts" / "cache"
-
-# 中国时区
-CST = timezone(timedelta(hours=8))
-
-
-def http_get(url: str, timeout: int = 120) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
 
 
 def fetch_week_list(max_pages: int = 1):
@@ -146,18 +135,15 @@ def main():
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    existing = {}
-    if DATA_FILE.exists():
-        data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
-        for r in data.get("records", []):
-            existing[(r["year"], r["week"])] = r
-    else:
-        data = {"meta": {}, "records": []}
+    ap = argparse.ArgumentParser(description="抓取中国流感监测周报")
+    ap.add_argument("--pages", type=int, default=1, help="列表页深度(每页 20 期)")
+    ap.add_argument("--weeks", type=int, default=12, help="最多尝试更新的期数")
+    ap.add_argument("--force", action="store_true", help="忽略已有记录强制重解析")
+    args = ap.parse_args()
+    max_pages, max_weeks, force = args.pages, args.weeks, args.force
 
-    # 分页遍历深度: --pages N (默认 1=仅首页); 期数上限 --weeks
-    max_pages = int(sys.argv[sys.argv.index("--pages") + 1]) if "--pages" in sys.argv else 1
-    max_weeks = int(sys.argv[sys.argv.index("--weeks") + 1]) if "--weeks" in sys.argv else 12
-    force = "--force" in sys.argv
+    data = load_data(DATA_FILE)
+    existing = {(r["year"], r["week"]): r for r in data.get("records", [])}
 
     weeks = fetch_week_list(max_pages)
     print(f"发现 {len(weeks)} 期周报, 最新: {weeks[0]['year']}年第{weeks[0]['week']}周")
@@ -192,15 +178,13 @@ def main():
     data["meta"] = {
         "source": "中国国家流感中心《中国流感监测周报》",
         "source_url": BASE,
-        "updated_at": datetime.now(CST).strftime("%Y-%m-%d %H:%M CST"),
+        "updated_at": now_cst().strftime("%Y-%m-%d %H:%M CST"),
         "latest": f"{weeks[0]['year']}年第{weeks[0]['week']}周",
         "history_pages": max_pages,
         "note": "南方/北方省份 ILI% 为哨点医院流感样病例占门急诊病例百分比; "
                 "阳性率为监测网络实验室检测阳性率。数据仅供参考, 不构成任何医疗建议。",
     }
-    DATA_FILE.write_text(
-        json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
-    )
+    write_data(DATA_FILE, data)
     print(f"完成: 更新 {updated} 期, 共 {len(records)} 期 -> {DATA_FILE}")
 
 

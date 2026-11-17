@@ -35,7 +35,6 @@ data/flu_notifiable.json            法定报告月度病例（2022-11 起, 增�
 index.html                          自包含单页（内联 CSS/JS, 手写 SVG 图表, 无外部依赖）
 verify_page.py                      数据完整性断言（CI 中强制执行, 43 项）
 tests/test_parse_pdf.py             CDC PDF 解析 golden 回归（4 类措辞变体）
-AUDIT-REPORT-2026-11-09.md          项目审计报告
 ```
 
 - 定时任务每周五（UTC 16:10 / 北京时间周六 00:10）运行，`--pages 4 --weeks 80` 增量维护

@@ -11,28 +11,15 @@ fetch_notifiable.py — 抓取国家疾控局《全国(法定)传染病疫情概
 每期提取统计表中: 流行性感冒 发病数/死亡数、丙类合计、甲乙丙总计。
 """
 
-import json
 import re
 import sys
-import urllib.request
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
+
+from common import CST, UA, ROOT, http_get, now_cst, write_data, load_data
 
 LIST_URL = "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/list.html"
 ART_URL = "https://www.ndcpa.gov.cn/jbkzzx/c100016/common/content/content_{}.html"
-UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/120.0 Safari/537.36")
-ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "data" / "flu_notifiable.json"
 CACHE_DIR = ROOT / "scripts" / "cache" / "ndcpa"
-
-CST = timezone(timedelta(hours=8))
-
-
-def http_get(url: str, timeout: int = 120) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
 
 
 def text_of(html: str) -> str:
@@ -98,13 +85,8 @@ def main():
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    existing = {}
-    if DATA_FILE.exists():
-        data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
-        for r in data.get("records", []):
-            existing[(r["year"], r["month"])] = r
-    else:
-        data = {"meta": {}, "records": []}
+    data = load_data(DATA_FILE)
+    existing = {(r["year"], r["month"]): r for r in data.get("records", [])}
 
     force = "--force" in sys.argv
 
@@ -139,14 +121,12 @@ def main():
     data["meta"] = {
         "source": "国家疾病预防控制局《全国(法定)传染病疫情概况》月度统计",
         "source_url": LIST_URL,
-        "updated_at": datetime.now(CST).strftime("%Y-%m-%d %H:%M CST"),
+        "updated_at": now_cst().strftime("%Y-%m-%d %H:%M CST"),
         "latest": articles[0]["title"] if articles else "",
         "note": "流行性感冒为丙类法定传染病, 报告病例数为临床诊断+实验室确诊病例, "
                 "按终审日期统计。数据仅供参考, 不构成任何医疗建议。",
     }
-    DATA_FILE.write_text(
-        json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
-    )
+    write_data(DATA_FILE, data)
     print(f"完成: 更新 {updated} 期, 共 {len(records)} 个月记录 -> {DATA_FILE}")
 
 

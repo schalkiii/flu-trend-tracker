@@ -13,32 +13,21 @@ fetch_multipathogen.py — 抓取中疾控《全国急性呼吸道传染病哨�
 增量运行: HTML 缓存到 scripts/cache/mp/, 已解析期次跳过。--force 重解析。
 """
 
-import json
+import argparse
 import re
 import sys
-import urllib.request
-from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+from common import CST, UA, ROOT, http_get, now_cst, write_data, load_data
+
 BASE = "https://www.chinacdc.cn/jksj/jksj04_14275/"
-UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/120.0 Safari/537.36")
-ROOT = Path(__file__).resolve().parent.parent
 DATA_FILE = ROOT / "data" / "flu_multipathogen.json"
 CACHE_DIR = ROOT / "scripts" / "cache" / "mp"
-
-CST = timezone(timedelta(hours=8))
 
 PATHOGENS = [
     "新型冠状病毒", "流感病毒", "呼吸道合胞病毒", "腺病毒", "人偏肺病毒",
     "副流感病毒", "普通冠状病毒", "博卡病毒", "鼻病毒", "肠道病毒", "肺炎支原体",
 ]
-
-
-def http_get(url: str, timeout: int = 120) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
 
 
 def fetch_article_list(max_pages: int = 1):
@@ -241,17 +230,15 @@ def main():
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    existing = {}
-    if DATA_FILE.exists():
-        data = json.loads(DATA_FILE.read_text(encoding="utf-8"))
-        for r in data.get("records", []):
-            existing[(r["year"], r["week"])] = r
-    else:
-        data = {"meta": {}, "records": []}
+    data = load_data(DATA_FILE)
+    existing = {(r["year"], r["week"]): r for r in data.get("records", [])}
 
-    max_pages = int(sys.argv[sys.argv.index("--pages") + 1]) if "--pages" in sys.argv else 1
-    max_articles = int(sys.argv[sys.argv.index("--weeks") + 1]) if "--weeks" in sys.argv else 12
-    force = "--force" in sys.argv
+    ap = argparse.ArgumentParser(description="抓取急性呼吸道传染病哨点监测")
+    ap.add_argument("--pages", type=int, default=1, help="列表页深度")
+    ap.add_argument("--weeks", type=int, default=12, help="最多尝试更新的文章数")
+    ap.add_argument("--force", action="store_true", help="忽略缓存强制重抓")
+    args = ap.parse_args()
+    max_pages, max_articles, force = args.pages, args.weeks, args.force
 
     articles = fetch_article_list(max_pages)
     print(f"发现 {len(articles)} 期哨点监测, 最新: {articles[0]['title'] if articles else '-'}")
@@ -287,16 +274,14 @@ def main():
     data["meta"] = {
         "source": "中国疾控中心《全国急性呼吸道传染病哨点监测情况》",
         "source_url": BASE,
-        "updated_at": datetime.now(CST).strftime("%Y-%m-%d %H:%M CST"),
+        "updated_at": now_cst().strftime("%Y-%m-%d %H:%M CST"),
         "latest": articles[0]["title"] if articles else "",
         "pathogens": PATHOGENS,
         "note": "门急诊=流感样病例呼吸道样本, 住院=严重急性呼吸道感染病例呼吸道样本; "
                 "数值为核酸检测阳性率(%)。2025年4-5月为多月合并发布, 已拆为逐周记录(无ILI%)。"
                 "数据仅供参考, 不构成任何医疗建议。",
     }
-    DATA_FILE.write_text(
-        json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
-    )
+    write_data(DATA_FILE, data)
     print(f"完成: 更新 {updated} 期文章, 共 {len(records)} 周记录 -> {DATA_FILE}")
 
 

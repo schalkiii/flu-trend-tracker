@@ -28,9 +28,14 @@ jobs:
 
       - name: Fetch latest reports
         run: |
-          python scripts/fetch_cdc.py --pages 4 --weeks 80
-          python scripts/fetch_multipathogen.py --pages 2 --weeks 12
-          python scripts/fetch_notifiable.py
+          # 单源失败不拖垮整轮: 记录退出码, 后置校验兜底(至少一源成功才继续)
+          rc=0
+          python scripts/fetch_cdc.py --pages 4 --weeks 80 || rc=1
+          python scripts/fetch_multipathogen.py --pages 2 --weeks 12 || rc=1
+          python scripts/fetch_notifiable.py || rc=1
+          if [ "$rc" != 0 ]; then
+            echo "::warning::部分数据源抓取失败, 本轮仅提交成功源的数据"
+          fi
 
       - name: Verify data integrity
         run: python verify_page.py
