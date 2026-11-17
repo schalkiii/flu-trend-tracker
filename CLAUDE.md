@@ -20,6 +20,7 @@ python scripts/publish_xhs.py [--public]           # 小红书发布（需 xiaoh
 ## 技术栈与结构
 
 - 纯 Python 3 标准库 + pdfplumber（解析）；index.html 零外部依赖手写 SVG（禁止引入 CDN）。
+- `scripts/common.py`：fetch 脚本共用工具（http_get/UA/CST/write_data/load_data），三 fetcher 统一引用。
 - `scripts/fetch_cdc.py`：周报列表分页（30 页可回溯 2015 年）→ PDF 缓存 → pdfplumber 正则解析。
 - `scripts/fetch_multipathogen.py`：中疾控哨点监测，**HTML 表格结构化解析**（`<table>/<tr>/<td>`
   逐行提取）。不使用整页文本正则——PDF 转写断字噪声（`+ 2.2`、`鼻 病毒`、跨 span 断字、
@@ -32,6 +33,13 @@ python scripts/publish_xhs.py [--public]           # 小红书发布（需 xiaoh
 
 ## 硬约束（违反必出事故）
 
+- **企业透明加密（TSD/DLP）环境坑**：git 对象/工作区文件可能被透明加密（文件头 `%TSD-Header-###%`）。
+  Windows git.exe 是受信进程读明文；python/grep/sed 读密文→**对加密文件静默假阴性**；
+  git unlink 被 minifilter 拦截报 `Invalid argument`。**解法：本地 git 操作（含
+  rebase/merge/reset/commit）一律走 WSL git**（`wsl.exe git -C /mnt/c/...`，POSIX unlink
+  不受拦截）；fetch/push 走 Windows git（WSL 无网络）。加密对象修复：Windows git
+  `cat-file` 读明文 → WSL rm 删旧 → python 重写 zlib 对象 → fsck 验证。WSL git 需
+  `core.autocrlf=true`（已设全局）。
 - **百度指数 days ≤ 365**：超过后 API 静默切周粒度，按日写入造成日期错位污染（fast.py 已做拦截）。
 - 百度指数是 TLS 指纹级风控：任何 urllib/curl 直连都 10018，必须经浏览器取 cipher-text。
 - webbridge daemon 与 shell 会话共生：起 daemon 与采集必须在同一条 shell 命令内。
@@ -62,6 +70,8 @@ python scripts/publish_xhs.py [--public]           # 小红书发布（需 xiaoh
 ## 当前状态与下一步
 
 - 已上线 https://schalkiii.github.io/flu-trend-tracker/ ：图1-6 + 表1，数据全绿
-  （verify 43 项 + golden 32 项），CI 每周五自动更新三个数据源。
+  （verify + golden），CI 每周五自动更新三个数据源（单源失败不拖垮整轮）。
+- 周描述均附 ISO 周历日期范围（badge/标题/表格/x 轴刻度）；图表 x 轴 7 组两行刻度
+  （周号+截止日），图6 月度 12 刻度。
 - 小红书发布管线已通（2026-11-09 三次试发成功，账号 Schalkiii）。
 - 下一步：可选做新冠月度数据模块（见 README 路线图）。
