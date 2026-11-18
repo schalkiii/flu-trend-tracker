@@ -81,7 +81,8 @@ python scripts/publish_xhs.py [--public]           # 小红书发布（需 xiaoh
 ## 当前状态与下一步
 
 - 已上线 https://schalkiii.github.io/flu-trend-tracker/ ：图1-6 + 表1，数据全绿
-  （verify + golden），CI 每周五自动更新三个数据源（单源失败不拖垮整轮）。
+  （verify + golden），CI 每周五自动更新三个数据源（单源失败不拖垮整轮），
+  数据 push 后 verify-pages job 轮询线上 JSON 确认部署生效（失败显式报错）。
 - 周描述均附 ISO 周历日期范围（badge/标题/表格/x 轴刻度）；图表 x 轴 7 组两行刻度
   （周号+截止日），图6 月度 12 刻度。
 - 小红书发布管线已通（2026-11-09 三次试发成功，账号 Schalkiii）。

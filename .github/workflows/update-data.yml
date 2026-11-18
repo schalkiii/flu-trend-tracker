@@ -54,3 +54,29 @@ jobs:
             git commit -m "data: update flu weekly report ($(date -u +%F))"
             git push
           fi
+
+  # Pages 部署验证: 数据 push 后轮询线上 JSON, 直到 meta.updated_at 与仓库一致。
+  # 无数据变更时线上本就一致, 首轮即通过; 有变更时等待 Pages 部署完成(一般 1-2 分钟)。
+  # Pages 部署失败/超时 => 本 job 显式报错, 而不是静默停留在旧数据。
+  verify-pages:
+    needs: update
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for GitHub Pages deploy and verify live data
+        run: |
+          expected=$(python -c "import json;print(json.load(open('data/flu_national.json'))['meta']['updated_at'])")
+          url="https://schalkiii.github.io/flu-trend-tracker/data/flu_national.json"
+          live=""
+          for i in $(seq 1 30); do
+            live=$(curl -fsSL "$url" | python -c "import json,sys;print(json.load(sys.stdin)['meta']['updated_at'])" 2>/dev/null || echo "")
+            if [ -n "$live" ] && [ "$live" = "$expected" ]; then
+              echo "Live site verified, data updated_at=$live"
+              exit 0
+            fi
+            echo "Deploy not ready yet (attempt $i/30): live=$live expected=$expected"
+            sleep 20
+          done
+          echo "::error::Pages 部署验证超时(10 分钟): 线上 data 仍为 '$live', 仓库为 '$expected'"
+          exit 1

@@ -39,6 +39,8 @@ tests/test_parse_pdf.py             CDC PDF 解析 golden 回归（4 类措辞�
 
 - 定时任务每周五（UTC 16:10 / 北京时间周六 00:10）运行，`--pages 4 --weeks 80` 增量维护
   两年窗口，已解析期次自动跳过；数据有变化才 commit，commit 触发 GitHub Pages 重新部署。
+- **部署验证 job**：数据 push 后自动轮询线上 JSON（最多 10 分钟），`meta.updated_at`
+  与仓库一致才算通过——Pages 部署失败或数据未上线时 CI 显式报错，不静默停留在旧数据。
 - 页面零外部依赖（无 CDN、无框架），适配移动端。
 
 ## 多病原与法定报告数据说明
