@@ -2,8 +2,8 @@
  "meta": {
   "source": "中国国家流感中心《中国流感监测周报》",
   "source_url": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/",
-  "updated_at": "2026-11-20 07:01 CST",
-  "latest": "2026年第46周",
+  "updated_at": "2026-11-27 08:31 CST",
+  "latest": "2026年第47周",
   "history_pages": 4,
   "note": "南方/北方省份 ILI% 为哨点医院流感样病例占门急诊病例百分比; 阳性率为监测网络实验室检测阳性率。数据仅供参考, 不构成任何医疗建议。"
  },
@@ -1843,6 +1843,24 @@
    "outbreaks": 144,
    "publish_date": "2026-11-19",
    "source": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202611/t20261119_1843101.htm"
+  },
+  {
+   "year": 2026,
+   "week": 47,
+   "south_ili_pct": 4.9,
+   "north_ili_pct": 5.2,
+   "south_positives": 2365,
+   "south_pos_rate": 21.3,
+   "north_positives": 2398,
+   "north_pos_rate": 23.4,
+   "total_positives": 4763,
+   "total_pos_rate": 22.3,
+   "total_tested": 21344,
+   "type_a": 3559,
+   "type_b": 1204,
+   "outbreaks": 212,
+   "publish_date": "2026-11-26",
+   "source": "https://ivdc.chinacdc.cn/cnic/zyzx/lgzb/202611/t20261126_1843221.htm"
   }
  ]
 }
